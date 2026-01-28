@@ -1,105 +1,203 @@
-import { Image } from "expo-image";
-import { Platform, StyleSheet } from "react-native";
+import { useState } from "react";
+import {
+  Text,
+  ScrollView,
+  View,
+  TouchableOpacity,
+  TextInput,
+  Pressable,
+} from "react-native";
+import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
+import { Ionicons, Feather, FontAwesome6 } from "@expo/vector-icons";
+import "../../global.css";
+import { useColorScheme } from "nativewind";
 
-import ParallaxScrollView from "@/components/parallax-scroll-view";
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { Link } from "expo-router";
+const SERVICES = [
+  { id: 1, label: "Services", icon: "gear" },
+  { id: 2, label: "Citizen Guide", icon: "book" },
+  { id: 3, label: "E-Services", icon: "globe" },
+  { id: 4, label: "Emergency", icon: "triangle-exclamation" },
+  { id: 5, label: "Utilities", icon: "lightbulb" },
+  { id: 6, label: "Transport", icon: "bus" },
+  { id: 7, label: "Business", icon: "briefcase" },
+  { id: 8, label: "Students", icon: "graduation-cap" },
+  { id: 9, label: "Startup", icon: "rocket" },
+  { id: 10, label: "i-Engage", icon: "briefcase" },
+  { id: 12, label: "Health", icon: "heart-pulse", soon: true },
+];
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
-      headerImage={
-        <Image
-          source={require("@/assets/images/partial-react-logo.png")}
-          style={styles.reactLogo}
-        />
-      }
-    >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Marhay na aga</ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit{" "}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText>{" "}
-          to see changes. Press{" "}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: "cmd + d",
-              android: "cmd + m",
-              web: "F12",
-            })}
-          </ThemedText>{" "}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction
-              title="Action"
-              icon="cube"
-              onPress={() => alert("Action pressed")}
-            />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert("Share pressed")}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert("Delete pressed")}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const { colorScheme, toggleColorScheme } = useColorScheme(); //
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showAll, setShowAll] = useState(false);
+  const [visibleServices, setVisibleServices] = useState(SERVICES.slice(0, 7));
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">
-            npm run reset-project
-          </ThemedText>{" "}
-          to get a fresh <ThemedText type="defaultSemiBold">app</ThemedText>{" "}
-          directory. This will move the current{" "}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{" "}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  return (
+    <SafeAreaProvider>
+      <View className="flex-1  font-poppins-reg dark:text-white">
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          className="bg-indigo-100/30 dark:bg-[#2C2932] relative"
+        >
+          <Pressable
+            onPress={toggleColorScheme}
+            className="absolute z-10 top-0 right-0 flex-row items-center p-4 bg-gray-100 dark:bg-slate-800 rounded-2xl"
+          >
+            <Ionicons
+              name={colorScheme === "dark" ? "moon" : "sunny"}
+              size={24}
+              color={colorScheme === "dark" ? "#FFFFFF" : "#000000"}
+            />
+            <Text className="ml-3 font-poppins-bold text-black dark:text-white">
+              Switch to {colorScheme === "dark" ? "Light" : "Dark"} Mode
+            </Text>
+          </Pressable>
+          {/* Header Section */}
+          <View className="bg-orange-100 dark:bg-indigo-950/60 pt-12 pb-8 px-4 ">
+            <View className="flex-row justify-between items-center mb-6">
+              <View className="flex-row items-center w-full bg-white/80 dark:bg-[#1E1D23] p-2 rounded-full flex-1 mr-4 flex-row items-center px-4 h-10 shadow-sm">
+                <Feather
+                  name="search"
+                  size={20}
+                  className="text-[#101828] dark:text-[#68676D]"
+                />
+                <TextInput
+                  placeholder="Search..."
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  className="pl-3 focus:outline-none w-full"
+                />
+              </View>
+              <TouchableOpacity className="bg-white/80 dark:bg-[#1E1D23] p-2 rounded-full shadow-sm">
+                <Ionicons
+                  name="notifications-outline"
+                  size={20}
+                  className="text-[#101828] dark:text-white"
+                />
+              </TouchableOpacity>
+            </View>
+
+            <Text className="text-[#3B1C6D] dark:text-white text-2xl font-poppins-bold">
+              Marhay na aga
+            </Text>
+            <TouchableOpacity className="flex-row items-center mt-2">
+              <View className="flex-row items-center bg-white p-2  rounded-full">
+                <Text className="text-[#3B1C6D] font-poppins-reg text-xs">
+                  Create your account
+                </Text>
+                <Ionicons
+                  name="arrow-forward"
+                  size={18}
+                  color="#1E1B4B"
+                  className="ml-2"
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          {/* Main Content Card */}
+          <View className=" rounded-t-3xl -mt-1">
+            <View className="px-4  pt-5   rounded-t-3xl bg-white dark:bg-[#1E1D23]">
+              <Text className="font-poppins-semibold text-[#101828] dark:text-white  text-xl mb-6">
+                What would you like to do?
+              </Text>
+
+              {/* Service Grid */}
+              <View className="flex-row flex-wrap justify-between ">
+                {visibleServices.map((service) => (
+                  <TouchableOpacity
+                    key={service.id}
+                    className="w-[22%] items-center mb-6 "
+                  >
+                    <View className="bg-indigo-100/30 dark:bg-[#2D2A33]  w-14 h-14 rounded-xl items-center justify-center mb-2 ">
+                      {service.soon && (
+                        <View className="absolute -top-2 -right-2 px-[6px] py-[2px] bg-[#F87171] rounded-full items-center justify-center">
+                          <Text className="text-[10px] font-poppins-reg text-white">
+                            SOON
+                          </Text>
+                        </View>
+                      )}
+                      <FontAwesome6
+                        name={service.icon as any}
+                        size={24}
+                        color={service.soon ? "#7e7e7eff" : "#F87171"}
+                      />
+                    </View>
+                    <Text
+                      className="text-center text-xs font-poppins-reg text-gray-600 dark:text-gray-200"
+                      numberOfLines={2}
+                    >
+                      {service.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+                {SERVICES.length > 7 && (
+                  <TouchableOpacity
+                    className="w-[22%] items-center mb-6"
+                    onPress={() => {
+                      setShowAll((prev) => !prev);
+                      setVisibleServices((prev) =>
+                        prev.length > 7 ? SERVICES.slice(0, 7) : SERVICES,
+                      );
+                    }}
+                  >
+                    <View className="bg-indigo-100/30 dark:bg-[#2D2A33]  w-14 h-14 rounded-2xl items-center justify-center mb-2">
+                      <FontAwesome6
+                        name={showAll ? "minus" : "plus"}
+                        size={18}
+                        color="#F87171"
+                      />
+                    </View>
+                    <Text
+                      className="text-center text-xs font-poppins-reg text-gray-600 dark:text-gray-200"
+                      numberOfLines={2}
+                    >
+                      {showAll ? "View Less" : "View More"}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+
+            {/* Featured Banner (Help us improve our city) */}
+            <View className="px-4  mt-3 bg-white  dark:bg-[#1E1D23]">
+              <View className="bg-indigo-900 rounded-2xl p-4 mt-6 mb-10">
+                <Text className="text-white font-poppins-semibold text-lg">
+                  Help us improve our city
+                </Text>
+                <Text className="text-indigo-100 text-xs font-poppins-reg mb-4 pr-6">
+                  Create an account to report local issues directly to the city.
+                </Text>
+                <TouchableOpacity className="bg-white py-2 rounded-full items-center">
+                  <Text className="text-indigo-900 font-poppins-reg">
+                    Sign In
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Explore Naga */}
+            <View className="px-4  pt-5  mt-2 bg-white  dark:bg-[#1E1D23]">
+              <Text className="font-poppins-semibold text-[#101828] dark:text-white  text-xl mb-6">
+                Explore Naga
+              </Text>
+              <View className="bg-indigo-900 rounded-2xl p-4 mt-6 mb-10">
+                <Text className="text-white font-poppins-semibold text-lg">
+                  Help us improve our city
+                </Text>
+                <Text className="text-indigo-100 text-xs font-poppins-reg mb-4 pr-6">
+                  Create an account to report local issues directly to the city.
+                </Text>
+                <TouchableOpacity className="bg-white py-2 rounded-full items-center">
+                  <Text className="text-indigo-900 font-poppins-reg">
+                    Sign In
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+      </View>
+    </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: "absolute",
-  },
-});

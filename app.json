@@ -7,10 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "mynagaassist",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    "ios": {
-      "supportsTablet": true
-    },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
@@ -40,7 +36,8 @@
           }
         }
       ],
-      "expo-barcode-scanner"
+      "expo-barcode-scanner",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,

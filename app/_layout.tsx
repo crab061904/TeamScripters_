@@ -1,3 +1,5 @@
+// app/_layout.tsx
+import { useEffect } from "react";
 import {
   DarkTheme,
   DefaultTheme,
@@ -7,14 +9,35 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 import "./../global.css";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import * as SplashScreen from "expo-splash-screen";
+import {
+  useFonts,
+  Poppins_400Regular,
+  Poppins_600SemiBold,
+  Poppins_700Bold,
+} from "@expo-google-fonts/poppins";
+import { useColorScheme } from "nativewind";
 
-export const unstable_settings = {
-  anchor: "(tabs)",
-};
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  // Load fonts and track status
+  const [loaded, error] = useFonts({
+    Poppins_400Regular,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
+  });
   const colorScheme = useColorScheme();
+
+  useEffect(() => {
+    if (loaded || error) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded, error]);
+
+  if (!loaded && !error) {
+    return null;
+  }
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
@@ -25,7 +48,8 @@ export default function RootLayout() {
           options={{ presentation: "modal", title: "Modal" }}
         />
       </Stack>
-      <StatusBar style="auto" />
+      {/* Set status bar icons to dark for visibility on light backgrounds */}
+      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
     </ThemeProvider>
   );
 }
