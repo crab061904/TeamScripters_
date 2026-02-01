@@ -46,7 +46,7 @@ export const signUp = async (
 
     const validationResult = RegisterSchema.safeParse(validationData);
     if (!validationResult.success) {
-      const errors = validationResult.error.errors
+      const errors = validationResult.error.issues
         .map((e) => e.message)
         .join(", ");
       throw new Error(`Validation failed: ${errors}`);
@@ -120,7 +120,7 @@ export const signIn = async (
     // Validate input
     const validationResult = LoginSchema.safeParse({ email, password });
     if (!validationResult.success) {
-      const errors = validationResult.error.errors
+      const errors = validationResult.error.issues
         .map((e) => e.message)
         .join(", ");
       throw new Error(`Validation failed: ${errors}`);

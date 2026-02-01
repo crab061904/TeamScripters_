@@ -3,9 +3,39 @@ import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { FontAwesome6, Ionicons, Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useAuth } from "@/src/context/AuthContext";
 
 export default function AccountScreen() {
+  const { userProfile, user, isEmailVerified } = useAuth();
+
   const sections = [
+    ...(userProfile
+      ? [
+          {
+            title: "Account",
+            items: [
+              {
+                icon: "person-outline",
+                lib: Ionicons,
+                label: "Edit Profile",
+                href: "#",
+              },
+              {
+                icon: "mail-outline",
+                lib: Ionicons,
+                label: isEmailVerified ? "Email Verified" : "Verify Email",
+                href: "#",
+              },
+              {
+                icon: "shield-checkmark-outline",
+                lib: Ionicons,
+                label: "Privacy & Security",
+                href: "#",
+              },
+            ],
+          },
+        ]
+      : []),
     {
       title: "Preferences",
       items: [
@@ -52,6 +82,21 @@ export default function AccountScreen() {
         },
       ],
     },
+    ...(userProfile
+      ? [
+          {
+            title: "Actions",
+            items: [
+              {
+                icon: "log-out-outline",
+                lib: Ionicons,
+                label: "Sign Out",
+                href: "#",
+              },
+            ],
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -87,33 +132,91 @@ export default function AccountScreen() {
               {/* Avatar Container */}
               <View className="w-24 h-24 bg-white rounded-[24px] p-1 shadow-2xl items-center justify-center">
                 <View className="w-full h-full bg-[#3B1C6D] rounded-[20px] items-center justify-center overflow-hidden">
-                  <Ionicons
-                    name="person"
-                    size={40}
-                    color="white"
-                    style={{ transform: [{ translateY: 5 }] }}
-                  />
+                  {userProfile ? (
+                    <Text className="text-white font-poppins-bold text-2xl">
+                      {userProfile.firstName?.charAt(0)}
+                      {userProfile.lastName?.charAt(0)}
+                    </Text>
+                  ) : (
+                    <Ionicons
+                      name="person"
+                      size={40}
+                      color="white"
+                      style={{ transform: [{ translateY: 5 }] }}
+                    />
+                  )}
                 </View>
               </View>
 
-              <View className="flex-1  space-y-1">
-                <Text className="text-xl font-poppins-bold text-white leading-tight">
-                  Get the Full Experience
-                </Text>
-                <Text className="text-white/90 text-xs font-poppins-reg leading-snug">
-                  Sign in to access full features
-                </Text>
-                <View className="pt-2">
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    className="bg-white px-6 py-2 rounded-full shadow-md self-start"
-                    onPress={() => router.push("/sign-in")}
-                  >
-                    <Text className="text-[#111111] font-poppins-bold text-sm">
-                      Sign in
+              <View className="flex-1 space-y-1">
+                {userProfile ? (
+                  <>
+                    <Text className="text-xl font-poppins-bold text-white leading-tight">
+                      {userProfile.firstName} {userProfile.lastName}
                     </Text>
-                  </TouchableOpacity>
-                </View>
+                    <Text className="text-white/90 text-xs font-poppins-reg leading-snug">
+                      {userProfile.email}
+                    </Text>
+                    <View className="flex-row items-center gap-2 pt-1">
+                      <View
+                        className={`px-2 py-1 rounded-full ${
+                          isEmailVerified
+                            ? "bg-green-500/20 border border-green-400"
+                            : "bg-yellow-500/20 border border-yellow-400"
+                        }`}
+                      >
+                        <Text
+                          className={`text-xs font-poppins-medium ${
+                            isEmailVerified
+                              ? "text-green-300"
+                              : "text-yellow-300"
+                          }`}
+                        >
+                          {isEmailVerified ? "Verified" : "Email Not Verified"}
+                        </Text>
+                      </View>
+                      <View
+                        className={`px-2 py-1 rounded-full ${
+                          userProfile.registrationStatus === "full"
+                            ? "bg-blue-500/20 border border-blue-400"
+                            : "bg-orange-500/20 border border-orange-400"
+                        }`}
+                      >
+                        <Text
+                          className={`text-xs font-poppins-medium ${
+                            userProfile.registrationStatus === "full"
+                              ? "text-blue-300"
+                              : "text-orange-300"
+                          }`}
+                        >
+                          {userProfile.registrationStatus === "full"
+                            ? "Complete"
+                            : "Partial Profile"}
+                        </Text>
+                      </View>
+                    </View>
+                  </>
+                ) : (
+                  <>
+                    <Text className="text-xl font-poppins-bold text-white leading-tight">
+                      Get the Full Experience
+                    </Text>
+                    <Text className="text-white/90 text-xs font-poppins-reg leading-snug">
+                      Sign in to access full features
+                    </Text>
+                    <View className="pt-2">
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        className="bg-white px-6 py-2 rounded-full shadow-md self-start"
+                        onPress={() => router.push("/sign-in")}
+                      >
+                        <Text className="text-[#111111] font-poppins-bold text-sm">
+                          Sign in
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </>
+                )}
               </View>
             </View>
           </View>
