@@ -37,9 +37,13 @@
         }
       ],
       "expo-barcode-scanner",
+<<<<<<< Updated upstream
       "expo-camera",
       "expo-font",
       "@react-native-community/datetimepicker"
+=======
+      "expo-font"
+>>>>>>> Stashed changes
     ],
     "experiments": {
       "typedRoutes": true,
