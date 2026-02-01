@@ -37,6 +37,7 @@
         }
       ],
       "expo-barcode-scanner",
+      "expo-camera",
       "expo-font"
     ],
     "experiments": {

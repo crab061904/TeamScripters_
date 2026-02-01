@@ -1,11 +1,9 @@
-import React from "react";
-import { Tabs, Text } from "expo-router";
-import { View } from "react-native";
 import { HapticTab } from "@/components/haptic-tab";
-import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Colors } from "@/constants/theme";
-import { useColorScheme } from "nativewind";
 import { FontAwesome6 } from "@expo/vector-icons";
+import { Tabs } from "expo-router";
+import { useColorScheme } from "nativewind";
+import { View } from "react-native";
 
 export default function TabLayout() {
   const { colorScheme } = useColorScheme();
@@ -47,6 +45,16 @@ export default function TabLayout() {
           title: "Services",
           tabBarIcon: ({ color, focused }) => (
             <TabIcon name="gears" color={color} focused={focused} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="ocr"
+        options={{
+          title: "OCR",
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name="file-lines" color={color} focused={focused} />
           ),
         }}
       />
