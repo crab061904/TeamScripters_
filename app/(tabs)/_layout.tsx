@@ -92,6 +92,13 @@ export default function TabLayout() {
           ),
         }}
       />
+
+      <Tabs.Screen
+        name="form"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

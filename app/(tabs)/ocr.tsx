@@ -224,7 +224,7 @@ export default function OcrScreen() {
 
           <Pressable
             onPress={pickImage}
-            className="bg-[#F33C25] dark:bg-[#FB634B] rounded-xl px-4 py-3 mb-3"
+            className="bg-indigo-900 dark:bg-indigo-900 rounded-xl px-4 py-3 mb-3"
           >
             <Text className="text-white font-poppins-semi text-center">
               Pick Image
@@ -233,7 +233,7 @@ export default function OcrScreen() {
 
           <Pressable
             onPress={openScanner}
-            className="bg-[#F33C25] dark:bg-[#FB634B] rounded-xl px-4 py-3 mb-3"
+            className="bg-indigo-900 dark:bg-indigo-900 rounded-xl px-4 py-3 mb-3"
           >
             <Text className="text-white font-poppins-semi text-center">
               Scan with Camera
@@ -246,7 +246,7 @@ export default function OcrScreen() {
             className={`rounded-xl px-4 py-3 mb-4 ${
               !imageUri || isRunning
                 ? "bg-gray-400"
-                : "bg-[#2C2932] dark:bg-white"
+                : "bg-indigo-900 dark:bg-indigo-900"
             }`}
           >
             <Text
