@@ -3,12 +3,19 @@
  * Copy and adapt these examples for your React Native/Web app
  */
 
-import React, { useState, useEffect } from 'react';
-import { View, Text, Button, TextInput, ActivityIndicator, Alert } from 'react-native';
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  Button,
+  TextInput,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 // ============================================================================
 // 1. INITIALIZE FIREBASE FUNCTIONS
@@ -26,10 +33,10 @@ const storage = getStorage();
 // }
 
 // Initialize callable functions
-const checkEligibility = httpsCallable(functions, 'checkEligibility');
-const submitApplication = httpsCallable(functions, 'submitApplication');
-const verifyApplication = httpsCallable(functions, 'verifyApplication');
-const processClaim = httpsCallable(functions, 'processClaim');
+const checkEligibility = httpsCallable(functions, "checkEligibility");
+const submitApplication = httpsCallable(functions, "submitApplication");
+const verifyApplication = httpsCallable(functions, "verifyApplication");
+const processClaim = httpsCallable(functions, "processClaim");
 
 // ============================================================================
 // 2. TYPE DEFINITIONS
@@ -39,7 +46,7 @@ interface EligibilityResult {
   programId: string;
   programName: string;
   eligibility: {
-    status: 'ELIGIBLE' | 'POTENTIAL_MATCH' | 'LOCKED';
+    status: "ELIGIBLE" | "POTENTIAL_MATCH" | "LOCKED";
     matchScore: number;
     missingRequirements: string[];
     gapDataChecklist?: string[];
@@ -49,7 +56,7 @@ interface EligibilityResult {
 interface ApplicationResponse {
   applicationId: string;
   feeAmount: number;
-  feeStatus: 'PAID' | 'WAIVED' | 'N/A';
+  feeStatus: "PAID" | "WAIVED" | "N/A";
 }
 
 // ============================================================================
@@ -57,8 +64,12 @@ interface ApplicationResponse {
 // ============================================================================
 
 export const HomeScreen = () => {
-  const [eligiblePrograms, setEligiblePrograms] = useState<EligibilityResult[]>([]);
-  const [potentialMatches, setPotentialMatches] = useState<EligibilityResult[]>([]);
+  const [eligiblePrograms, setEligiblePrograms] = useState<EligibilityResult[]>(
+    [],
+  );
+  const [potentialMatches, setPotentialMatches] = useState<EligibilityResult[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
 
@@ -78,21 +89,21 @@ export const HomeScreen = () => {
     try {
       setLoading(true);
       const result = await checkEligibility({});
-      
+
       const eligible = result.data.results.filter(
-        (r: EligibilityResult) => r.eligibility.status === 'ELIGIBLE'
+        (r: EligibilityResult) => r.eligibility.status === "ELIGIBLE",
       );
       const potential = result.data.results.filter(
-        (r: EligibilityResult) => r.eligibility.status === 'POTENTIAL_MATCH'
+        (r: EligibilityResult) => r.eligibility.status === "POTENTIAL_MATCH",
       );
 
       setEligiblePrograms(eligible);
       setPotentialMatches(potential);
     } catch (error: any) {
-      if (error.code === 'unauthenticated') {
-        Alert.alert('Error', 'Please log in to view programs');
+      if (error.code === "unauthenticated") {
+        Alert.alert("Error", "Please log in to view programs");
       } else {
-        Alert.alert('Error', 'Failed to load programs');
+        Alert.alert("Error", "Failed to load programs");
       }
     } finally {
       setLoading(false);
@@ -109,39 +120,64 @@ export const HomeScreen = () => {
 
   return (
     <View style={{ padding: 20 }}>
-      <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20 }}>
+      <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 20 }}>
         Available Programs
       </Text>
 
-      <Text style={{ fontSize: 18, fontWeight: '600', marginTop: 20 }}>
+      <Text style={{ fontSize: 18, fontWeight: "600", marginTop: 20 }}>
         Eligible Programs ({eligiblePrograms.length})
       </Text>
       {eligiblePrograms.map((program) => (
-        <View key={program.programId} style={{ marginVertical: 10, padding: 15, backgroundColor: '#e8f5e9', borderRadius: 8 }}>
-          <Text style={{ fontSize: 16, fontWeight: '600' }}>{program.programName}</Text>
+        <View
+          key={program.programId}
+          style={{
+            marginVertical: 10,
+            padding: 15,
+            backgroundColor: "#e8f5e9",
+            borderRadius: 8,
+          }}
+        >
+          <Text style={{ fontSize: 16, fontWeight: "600" }}>
+            {program.programName}
+          </Text>
           <Text>Match Score: {program.eligibility.matchScore}%</Text>
           <Button
             title="Apply Now"
             onPress={() => {
               // Navigate to application screen
-              console.log('Navigate to application:', program.programId);
+              console.log("Navigate to application:", program.programId);
             }}
           />
         </View>
       ))}
 
-      <Text style={{ fontSize: 18, fontWeight: '600', marginTop: 20 }}>
+      <Text style={{ fontSize: 18, fontWeight: "600", marginTop: 20 }}>
         Complete Your Profile ({potentialMatches.length})
       </Text>
       {potentialMatches.map((program) => (
-        <View key={program.programId} style={{ marginVertical: 10, padding: 15, backgroundColor: '#fff3e0', borderRadius: 8 }}>
-          <Text style={{ fontSize: 16, fontWeight: '600' }}>{program.programName}</Text>
-          <Text>Missing: {program.eligibility.gapDataChecklist?.join(', ')}</Text>
+        <View
+          key={program.programId}
+          style={{
+            marginVertical: 10,
+            padding: 15,
+            backgroundColor: "#fff3e0",
+            borderRadius: 8,
+          }}
+        >
+          <Text style={{ fontSize: 16, fontWeight: "600" }}>
+            {program.programName}
+          </Text>
+          <Text>
+            Missing: {program.eligibility.gapDataChecklist?.join(", ")}
+          </Text>
           <Button
             title="Complete Profile"
             onPress={() => {
               // Navigate to profile completion
-              console.log('Complete profile for:', program.eligibility.gapDataChecklist);
+              console.log(
+                "Complete profile for:",
+                program.eligibility.gapDataChecklist,
+              );
             }}
           />
         </View>
@@ -156,7 +192,11 @@ export const HomeScreen = () => {
 
 export const ApplicationScreen = ({ programId }: { programId: string }) => {
   const [documents, setDocuments] = useState<Record<string, string>>({});
-  const [appointment, setAppointment] = useState<{ date: string; time: string; location: string } | null>(null);
+  const [appointment, setAppointment] = useState<{
+    date: string;
+    time: string;
+    location: string;
+  } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -168,14 +208,17 @@ export const ApplicationScreen = ({ programId }: { programId: string }) => {
       const blob = await response.blob();
 
       // Upload to Firebase Storage
-      const storageRef = ref(storage, `documents/${auth.currentUser?.uid}/${documentType}_${Date.now()}`);
+      const storageRef = ref(
+        storage,
+        `documents/${auth.currentUser?.uid}/${documentType}_${Date.now()}`,
+      );
       await uploadBytes(storageRef, blob);
       const url = await getDownloadURL(storageRef);
 
       setDocuments((prev) => ({ ...prev, [documentType]: url }));
-      Alert.alert('Success', 'Document uploaded');
+      Alert.alert("Success", "Document uploaded");
     } catch (error) {
-      Alert.alert('Error', 'Failed to upload document');
+      Alert.alert("Error", "Failed to upload document");
     } finally {
       setUploading(false);
     }
@@ -192,31 +235,38 @@ export const ApplicationScreen = ({ programId }: { programId: string }) => {
 
       const response = result.data as ApplicationResponse;
 
-      if (response.feeStatus === 'PAID' && response.feeAmount > 0) {
+      if (response.feeStatus === "PAID" && response.feeAmount > 0) {
         Alert.alert(
-          'Payment Required',
+          "Payment Required",
           `Please pay PHP ${response.feeAmount}`,
           [
             {
-              text: 'Pay Now',
+              text: "Pay Now",
               onPress: () => {
                 // Navigate to payment screen
-                console.log('Navigate to payment:', response.applicationId, response.feeAmount);
+                console.log(
+                  "Navigate to payment:",
+                  response.applicationId,
+                  response.feeAmount,
+                );
               },
             },
-          ]
+          ],
         );
       } else {
-        Alert.alert('Success', 'Application submitted successfully!');
+        Alert.alert("Success", "Application submitted successfully!");
         // Navigate back or refresh
       }
     } catch (error: any) {
-      if (error.code === 'already-exists') {
-        Alert.alert('Error', 'You already have a pending application for this program');
-      } else if (error.code === 'invalid-argument') {
-        Alert.alert('Error', `Invalid input: ${error.message}`);
+      if (error.code === "already-exists") {
+        Alert.alert(
+          "Error",
+          "You already have a pending application for this program",
+        );
+      } else if (error.code === "invalid-argument") {
+        Alert.alert("Error", `Invalid input: ${error.message}`);
       } else {
-        Alert.alert('Error', 'Failed to submit application');
+        Alert.alert("Error", "Failed to submit application");
       }
     } finally {
       setSubmitting(false);
@@ -225,7 +275,7 @@ export const ApplicationScreen = ({ programId }: { programId: string }) => {
 
   return (
     <View style={{ padding: 20 }}>
-      <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20 }}>
+      <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 20 }}>
         Submit Application
       </Text>
 
@@ -234,42 +284,42 @@ export const ApplicationScreen = ({ programId }: { programId: string }) => {
         title="Upload Birth Certificate"
         onPress={() => {
           // Open file picker
-          console.log('Open file picker for birth certificate');
+          console.log("Open file picker for birth certificate");
         }}
       />
       <Button
         title="Upload Barangay Clearance"
         onPress={() => {
           // Open file picker
-          console.log('Open file picker for barangay clearance');
+          console.log("Open file picker for barangay clearance");
         }}
       />
 
       <Text style={{ marginTop: 20 }}>Appointment (Optional):</Text>
       <TextInput
         placeholder="Date (YYYY-MM-DD)"
-        value={appointment?.date || ''}
+        value={appointment?.date || ""}
         onChangeText={(text) =>
-          setAppointment((prev) => ({ ...prev, date: text } as any))
+          setAppointment((prev) => ({ ...prev, date: text }) as any)
         }
       />
       <TextInput
         placeholder="Time (HH:mm)"
-        value={appointment?.time || ''}
+        value={appointment?.time || ""}
         onChangeText={(text) =>
-          setAppointment((prev) => ({ ...prev, time: text } as any))
+          setAppointment((prev) => ({ ...prev, time: text }) as any)
         }
       />
       <TextInput
         placeholder="Location"
-        value={appointment?.location || ''}
+        value={appointment?.location || ""}
         onChangeText={(text) =>
-          setAppointment((prev) => ({ ...prev, location: text } as any))
+          setAppointment((prev) => ({ ...prev, location: text }) as any)
         }
       />
 
       <Button
-        title={submitting ? 'Submitting...' : 'Submit Application'}
+        title={submitting ? "Submitting..." : "Submit Application"}
         onPress={handleSubmit}
         disabled={submitting || uploading}
       />
@@ -293,7 +343,7 @@ export const AdminDashboard = () => {
   const checkUserRole = async () => {
     const user = auth.currentUser;
     if (user) {
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      const userDoc = await getDoc(doc(db, "users", user.uid));
       setUserRole(userDoc.data()?.role);
     }
   };
@@ -301,75 +351,84 @@ export const AdminDashboard = () => {
   const loadApplications = async () => {
     // Load applications from Firestore
     // This is just a placeholder - implement your Firestore query
-    console.log('Load applications');
+    console.log("Load applications");
   };
 
   const handleApprove = async (applicationId: string) => {
     try {
       const result = await verifyApplication({
         applicationId,
-        action: 'APPROVE',
+        action: "APPROVE",
       });
-      Alert.alert('Success', result.data.message);
+      Alert.alert("Success", result.data.message);
       loadApplications(); // Refresh
     } catch (error: any) {
-      if (error.code === 'permission-denied') {
-        Alert.alert('Error', 'Admin access required');
+      if (error.code === "permission-denied") {
+        Alert.alert("Error", "Admin access required");
       } else {
-        Alert.alert('Error', 'Failed to approve application');
+        Alert.alert("Error", "Failed to approve application");
       }
     }
   };
 
   const handleReject = async (applicationId: string, reason: string) => {
     if (!reason.trim()) {
-      Alert.alert('Error', 'Rejection reason is required');
+      Alert.alert("Error", "Rejection reason is required");
       return;
     }
 
     try {
       const result = await verifyApplication({
         applicationId,
-        action: 'REJECT',
+        action: "REJECT",
         rejectionReason: reason,
       });
-      Alert.alert('Success', 'Application rejected');
+      Alert.alert("Success", "Application rejected");
       loadApplications(); // Refresh
     } catch (error: any) {
-      Alert.alert('Error', 'Failed to reject application');
+      Alert.alert("Error", "Failed to reject application");
     }
   };
 
-  if (userRole !== 'admin') {
+  if (userRole !== "admin") {
     return <Text>Admin access required</Text>;
   }
 
   return (
     <View style={{ padding: 20 }}>
-      <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20 }}>
+      <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 20 }}>
         Admin Dashboard
       </Text>
       {applications.map((app) => (
-        <View key={app.id} style={{ marginVertical: 10, padding: 15, backgroundColor: '#f5f5f5', borderRadius: 8 }}>
+        <View
+          key={app.id}
+          style={{
+            marginVertical: 10,
+            padding: 15,
+            backgroundColor: "#f5f5f5",
+            borderRadius: 8,
+          }}
+        >
           <Text>Application ID: {app.id}</Text>
           <Text>Status: {app.status}</Text>
-          <View style={{ flexDirection: 'row', marginTop: 10 }}>
+          <View style={{ flexDirection: "row", marginTop: 10 }}>
             <Button title="Approve" onPress={() => handleApprove(app.id)} />
             <Button
               title="Reject"
               onPress={() => {
                 // Show input dialog for rejection reason
                 Alert.prompt(
-                  'Rejection Reason',
-                  'Enter reason for rejection:',
+                  "Rejection Reason",
+                  "Enter reason for rejection:",
                   [
-                    { text: 'Cancel', style: 'cancel' },
+                    { text: "Cancel", style: "cancel" },
                     {
-                      text: 'Reject',
-                      onPress: (reason) => reason && handleReject(app.id, reason),
+                      text: "Reject",
+                      onPress: (reason) =>
+                        reason && handleReject(app.id, reason),
                     },
                   ],
-                  'plain-text'
+                  "plain-text",
                 );
               }}
             />
@@ -400,22 +459,25 @@ export const DistributionScreen = () => {
     try {
       const result = await processClaim({
         qrCodeString: data,
-        location: 'City Hall - Main Office', // Optional
+        location: "City Hall - Main Office", // Optional
       });
 
-      Alert.alert('Success', result.data.message);
+      Alert.alert("Success", result.data.message);
       // Update UI or refresh data
     } catch (error: any) {
-      if (error.code === 'failed-precondition') {
-        if (error.message.includes('status')) {
-          Alert.alert('Error', 'Application must be APPROVED to process claim');
-        } else if (error.message.includes('appointment')) {
-          Alert.alert('Error', 'Cannot process claim before appointment date/time');
+      if (error.code === "failed-precondition") {
+        if (error.message.includes("status")) {
+          Alert.alert("Error", "Application must be APPROVED to process claim");
+        } else if (error.message.includes("appointment")) {
+          Alert.alert(
+            "Error",
+            "Cannot process claim before appointment date/time",
+          );
         } else {
-          Alert.alert('Error', error.message);
+          Alert.alert("Error", error.message);
         }
       } else {
-        Alert.alert('Error', 'Failed to process claim');
+        Alert.alert("Error", "Failed to process claim");
       }
     } finally {
       setProcessing(false);
@@ -426,7 +488,7 @@ export const DistributionScreen = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      <Text style={{ padding: 20, fontSize: 18, fontWeight: 'bold' }}>
+      <Text style={{ padding: 20, fontSize: 18, fontWeight: "bold" }}>
         Scan QR Code to Process Claim
       </Text>
       {/* 
@@ -437,7 +499,7 @@ export const DistributionScreen = () => {
       />
       */}
       {scanned && (
-        <View style={{ padding: 20, backgroundColor: 'white' }}>
+        <View style={{ padding: 20, backgroundColor: "white" }}>
           <Text>Processing...</Text>
           <Button title="Tap to Scan Again" onPress={() => setScanned(false)} />
         </View>
@@ -452,30 +514,33 @@ export const DistributionScreen = () => {
 
 export const handleFunctionError = (error: any) => {
   switch (error.code) {
-    case 'unauthenticated':
-      Alert.alert('Authentication Required', 'Please log in to continue');
+    case "unauthenticated":
+      Alert.alert("Authentication Required", "Please log in to continue");
       // Navigate to login
       break;
-    case 'permission-denied':
-      Alert.alert('Access Denied', 'You do not have permission to perform this action');
+    case "permission-denied":
+      Alert.alert(
+        "Access Denied",
+        "You do not have permission to perform this action",
+      );
       break;
-    case 'not-found':
-      Alert.alert('Not Found', 'The requested resource was not found');
+    case "not-found":
+      Alert.alert("Not Found", "The requested resource was not found");
       break;
-    case 'invalid-argument':
-      Alert.alert('Invalid Input', error.message || 'Please check your input');
+    case "invalid-argument":
+      Alert.alert("Invalid Input", error.message || "Please check your input");
       break;
-    case 'failed-precondition':
-      Alert.alert('Error', error.message);
+    case "failed-precondition":
+      Alert.alert("Error", error.message);
       break;
-    case 'already-exists':
-      Alert.alert('Already Exists', 'This resource already exists');
+    case "already-exists":
+      Alert.alert("Already Exists", "This resource already exists");
       break;
-    case 'internal':
-      Alert.alert('Server Error', 'An error occurred. Please try again.');
+    case "internal":
+      Alert.alert("Server Error", "An error occurred. Please try again.");
       break;
     default:
-      Alert.alert('Error', 'An unexpected error occurred');
+      Alert.alert("Error", "An unexpected error occurred");
   }
 };
 
@@ -501,9 +566,9 @@ export const useEligibility = (programId?: string) => {
       const result = await checkEligibility({ programId });
       const results = result.data.results as EligibilityResult[];
 
-      setEligible(results.filter((r) => r.eligibility.status === 'ELIGIBLE'));
+      setEligible(results.filter((r) => r.eligibility.status === "ELIGIBLE"));
       setPotential(
-        results.filter((r) => r.eligibility.status === 'POTENTIAL_MATCH')
+        results.filter((r) => r.eligibility.status === "POTENTIAL_MATCH"),
       );
     } catch (err: any) {
       setError(err.message);
