@@ -1,27 +1,15 @@
-/**
- * Firestore TypeScript Interfaces for Naga Assist
- * Strict type definitions for all collections
- */
-
 import * as admin from 'firebase-admin';
 
 type Timestamp = admin.firestore.Timestamp | Date;
-
-// ============================================================================
-// USERS COLLECTION
-// ============================================================================
 
 export interface UserDocument {
   uid: string;
   firstName: string;
   lastName: string;
-  birthDate: string; // ISO format (YYYY-MM-DD)
+  birthDate: string;
   sex: 'M' | 'F' | 'Non-Binary';
   barangay: string;
-  
-  // Tier 2: Socio-Economic Profile (Sanggawadan Form)
   socioEconomicProfile: SocioEconomicProfile;
-  
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -34,7 +22,7 @@ export interface SocioEconomicProfile {
     lightingSource: string;
   };
   monthlyIncome: 'BELOW_10K' | '10K_15K' | '15K_20K' | 'ABOVE_20K';
-  assets: string[]; // e.g., ['TV', 'Refrigerator', 'Tricycle']
+  assets: string[];
   isSoloParent: boolean;
   isPWD: boolean;
   isIndigent: boolean;
@@ -47,10 +35,6 @@ export interface FamilyMember {
   occupation: string;
 }
 
-// ============================================================================
-// PROGRAMS COLLECTION
-// ============================================================================
-
 export interface ProgramDocument {
   name: string;
   department: string;
@@ -62,28 +46,24 @@ export interface ProgramDocument {
 }
 
 export interface EligibilityRule {
-  field: string; // Dot-notation path (e.g., 'socioEconomicProfile.isPWD', 'age')
+  field: string;
   operator: '==' | '>=' | '<=' | 'array-contains';
   value: any;
-  isMandatory: boolean; // true = mandatory gate, false = informational gate
+  isMandatory: boolean;
 }
 
 export interface FeeStructure {
-  firstTime: number; // PHP amount
-  replacement: number; // PHP amount
+  firstTime: number;
+  replacement: number;
 }
-
-// ============================================================================
-// APPLICATIONS COLLECTION
-// ============================================================================
 
 export interface ApplicationDocument {
   userId: string;
   programId: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'DISBURSED';
   feeStatus: 'PAID' | 'WAIVED' | 'N/A';
-  feeAmount: number; // PHP amount (0 if waived or N/A)
-  uploadedDocuments: Record<string, string>; // Document type -> Storage URL
+  feeAmount: number;
+  uploadedDocuments: Record<string, string>;
   rejectionReason?: string;
   appointmentSlot?: AppointmentSlot;
   createdAt: Timestamp;
@@ -92,35 +72,27 @@ export interface ApplicationDocument {
 }
 
 export interface AppointmentSlot {
-  date: string; // ISO date string
-  time: string; // HH:mm format
+  date: string;
+  time: string;
   location: string;
 }
-
-// ============================================================================
-// ASSISTANCE HISTORY COLLECTION
-// ============================================================================
 
 export interface AssistanceHistoryDocument {
   userId: string;
   programId: string;
   applicationId: string;
   disbursedAt: Timestamp;
-  amount?: number; // If applicable
+  amount?: number;
   createdAt: Timestamp;
 }
-
-// ============================================================================
-// HELPER TYPES
-// ============================================================================
 
 export type EligibilityStatus = 'ELIGIBLE' | 'POTENTIAL_MATCH' | 'LOCKED';
 
 export interface EligibilityResult {
   status: EligibilityStatus;
-  matchScore: number; // 0-100
+  matchScore: number;
   missingRequirements: string[];
-  gapDataChecklist?: string[]; // Fields that need to be filled for POTENTIAL_MATCH
+  gapDataChecklist?: string[];
 }
 
 export interface ApplicationSubmissionInput {
@@ -136,6 +108,6 @@ export interface VerificationInput {
 }
 
 export interface ClaimProcessingInput {
-  qrCodeString: string; // Contains applicationId
-  location?: string; // Optional location validation
+  qrCodeString: string;
+  location?: string;
 }

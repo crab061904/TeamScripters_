@@ -1,15 +1,11 @@
-/**
- * Cloud Function: checkEligibility
- * Match Engine - Evaluates user eligibility against program rules using Logic Gates
- */
-
-import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import { db } from '../config/firebase';
-import { UserDocument, ProgramDocument, EligibilityResult } from '../types/firestore';
+import { EligibilityResult, ProgramDocument, UserDocument } from '../types/firestore';
 import { evaluateEligibility } from '../utils/evaluator';
+import { verifyResidentAccess } from '../utils/security';
 
 interface CheckEligibilityInput {
-  programId?: string; // If null, check all active programs
+  programId?: string;
 }
 
 interface CheckEligibilityOutput {
@@ -20,26 +16,25 @@ interface CheckEligibilityOutput {
   }>;
 }
 
-/**
- * Check eligibility for a specific program or all active programs
- */
 export const checkEligibility = onCall(
   {
     cors: true,
-    enforceAppCheck: false, // Set to true in production if using App Check
+    enforceAppCheck: false,
   },
   async (request): Promise<CheckEligibilityOutput> => {
     try {
-      // Verify authentication
+      
       const auth = request.auth;
       if (!auth) {
         throw new HttpsError('unauthenticated', 'User must be authenticated');
       }
 
       const userId = auth.uid;
+
+      // Security check: Verify user is not banned
+      await verifyResidentAccess(userId);
       const { programId } = request.data as CheckEligibilityInput;
 
-      // Fetch user profile
       const userDoc = await db.collection('users').doc(userId).get();
       if (!userDoc.exists) {
         throw new HttpsError('not-found', 'User profile not found');
@@ -47,11 +42,10 @@ export const checkEligibility = onCall(
 
       const userData = userDoc.data() as UserDocument;
 
-      // Determine which programs to check
       let programsQuery = db.collection('programs').where('status', '==', 'ACTIVE');
 
       if (programId) {
-        // Check specific program
+        
         const programDoc = await db.collection('programs').doc(programId).get();
         if (!programDoc.exists) {
           throw new HttpsError('not-found', 'Program not found');
@@ -75,7 +69,7 @@ export const checkEligibility = onCall(
           ],
         };
       } else {
-        // Check all active programs
+        
         const programsSnapshot = await programsQuery.get();
         const results: CheckEligibilityOutput['results'] = [];
 

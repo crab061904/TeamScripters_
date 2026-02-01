@@ -1,20 +1,12 @@
-/**
- * Logic Gate Evaluator
- * Evaluates eligibility rules against user data
- */
-
 import { EligibilityRule, UserDocument } from '../types/firestore';
-import { getFieldValue, calculateAge, hasFieldValue } from './fieldAccessor';
+import { calculateAge, getFieldValue, hasFieldValue } from './fieldAccessor';
 
 export interface EvaluationResult {
   passed: boolean;
-  hasValue: boolean; // Whether the field has any value (not null/undefined/empty)
+  hasValue: boolean; 
   fieldPath: string;
 }
 
-/**
- * Evaluate a single eligibility rule against user data
- */
 export function evaluateRule(
   rule: EligibilityRule,
   userData: UserDocument
@@ -22,7 +14,6 @@ export function evaluateRule(
   let fieldValue: any;
   let hasValue = false;
 
-  // Special handling for 'age' field (calculated from birthDate)
   if (rule.field === 'age') {
     fieldValue = calculateAge(userData.birthDate);
     hasValue = userData.birthDate ? true : false;
@@ -31,7 +22,6 @@ export function evaluateRule(
     hasValue = hasFieldValue(userData, rule.field);
   }
 
-  // If field has no value, rule fails but we track it for gap data
   if (!hasValue) {
     return {
       passed: false,
@@ -40,7 +30,6 @@ export function evaluateRule(
     };
   }
 
-  // Evaluate based on operator
   let passed = false;
   switch (rule.operator) {
     case '==':
@@ -70,9 +59,6 @@ export function evaluateRule(
   };
 }
 
-/**
- * Evaluate all rules and determine eligibility status
- */
 export function evaluateEligibility(
   rules: EligibilityRule[],
   userData: UserDocument
@@ -85,7 +71,6 @@ export function evaluateEligibility(
   const mandatoryRules: EligibilityRule[] = [];
   const informationalRules: EligibilityRule[] = [];
 
-  // Separate mandatory and informational rules
   for (const rule of rules) {
     if (rule.isMandatory) {
       mandatoryRules.push(rule);
@@ -94,17 +79,14 @@ export function evaluateEligibility(
     }
   }
 
-  // Evaluate mandatory rules first
   const mandatoryResults = mandatoryRules.map((rule) => ({
     rule,
     result: evaluateRule(rule, userData),
   }));
 
-  // Check if any mandatory rule failed
   const failedMandatory = mandatoryResults.filter((r) => !r.result.passed);
   if (failedMandatory.length > 0) {
-    // If mandatory failed due to missing data, still LOCKED (no notification)
-    // If mandatory failed due to not meeting criteria, LOCKED
+
     return {
       status: 'LOCKED',
       missingRequirements: failedMandatory.map((r) => r.rule.field),
@@ -113,13 +95,11 @@ export function evaluateEligibility(
     };
   }
 
-  // All mandatory rules passed, now check informational rules
   const informationalResults = informationalRules.map((rule) => ({
     rule,
     result: evaluateRule(rule, userData),
   }));
 
-  // Check for missing optional data (Gap Data Rule)
   const missingOptionalData = informationalResults.filter(
     (r) => !r.result.hasValue
   );
@@ -127,7 +107,6 @@ export function evaluateEligibility(
     (r) => r.result.hasValue && !r.result.passed
   );
 
-  // If any optional data is missing, trigger POTENTIAL_MATCH
   if (missingOptionalData.length > 0) {
     return {
       status: 'POTENTIAL_MATCH',
@@ -142,7 +121,6 @@ export function evaluateEligibility(
     };
   }
 
-  // All rules passed (both mandatory and optional)
   if (failedOptionalCriteria.length === 0) {
     return {
       status: 'ELIGIBLE',
@@ -152,8 +130,6 @@ export function evaluateEligibility(
     };
   }
 
-  // Optional criteria failed but data exists - still ELIGIBLE
-  // (Informational gates are for matching, not blocking)
   return {
     status: 'ELIGIBLE',
     missingRequirements: [],
@@ -167,9 +143,6 @@ export function evaluateEligibility(
   };
 }
 
-/**
- * Calculate match score (0-100)
- */
 function calculateMatchScore(
   mandatoryCount: number,
   optionalCount: number,
@@ -179,7 +152,7 @@ function calculateMatchScore(
   const totalRules = mandatoryCount + optionalCount;
   if (totalRules === 0) return 100;
 
-  const passedMandatory = mandatoryCount; // Already verified
+  const passedMandatory = mandatoryCount; 
   const passedOptional = optionalCount - missingOptionalCount - failedOptionalCount;
 
   const totalPassed = passedMandatory + passedOptional;

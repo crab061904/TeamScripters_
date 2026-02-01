@@ -1,22 +1,14 @@
-/**
- * Cloud Function: processClaim
- * Handles QR code scanning for benefit distribution
- */
-
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { z } from 'zod';
 import { db } from '../config/firebase';
 import { ApplicationDocument, ClaimProcessingInput } from '../types/firestore';
+import { verifyEmployeeAccess } from '../utils/security';
 
-// Zod schema for input validation
 const processClaimSchema = z.object({
   qrCodeString: z.string().min(1, 'QR code string is required'),
   location: z.string().optional(),
 });
 
-/**
- * Process a claim using QR code (for distribution/disbursement)
- */
 export const processClaim = onCall(
   {
     cors: true,
@@ -24,13 +16,17 @@ export const processClaim = onCall(
   },
   async (request): Promise<{ success: boolean; message: string; applicationId: string }> => {
     try {
-      // Verify authentication (can be admin or staff)
+      
       const auth = request.auth;
       if (!auth) {
         throw new HttpsError('unauthenticated', 'User must be authenticated');
       }
 
-      // Validate input
+      const userId = auth.uid;
+
+      // Security check: Verify employee or admin access
+      await verifyEmployeeAccess(userId);
+
       const validationResult = processClaimSchema.safeParse(request.data);
       if (!validationResult.success) {
         throw new HttpsError(
@@ -41,8 +37,6 @@ export const processClaim = onCall(
 
       const input: ClaimProcessingInput = validationResult.data;
 
-      // Extract applicationId from QR code string
-      // QR code format: "NAGA_ASSIST:{applicationId}" or just the applicationId
       let applicationId: string;
       if (input.qrCodeString.startsWith('NAGA_ASSIST:')) {
         applicationId = input.qrCodeString.split(':')[1];
@@ -50,7 +44,6 @@ export const processClaim = onCall(
         applicationId = input.qrCodeString;
       }
 
-      // Fetch application
       const applicationRef = db.collection('applications').doc(applicationId);
       const applicationDoc = await applicationRef.get();
 
@@ -60,7 +53,6 @@ export const processClaim = onCall(
 
       const application = applicationDoc.data() as ApplicationDocument;
 
-      // Verify application is approved
       if (application.status !== 'APPROVED') {
         throw new HttpsError(
           'failed-precondition',
@@ -68,7 +60,6 @@ export const processClaim = onCall(
         );
       }
 
-      // Validate appointment slot if provided
       if (application.appointmentSlot) {
         const appointmentDate = new Date(application.appointmentSlot.date);
         const appointmentTime = application.appointmentSlot.time;
@@ -77,7 +68,6 @@ export const processClaim = onCall(
           `${appointmentDate.toISOString().split('T')[0]}T${appointmentTime}`
         );
 
-        // Allow processing on the appointment date or after
         if (today < appointmentDateTime) {
           throw new HttpsError(
             'failed-precondition',
@@ -85,7 +75,6 @@ export const processClaim = onCall(
           );
         }
 
-        // Optional: Validate location if provided
         if (input.location && application.appointmentSlot.location !== input.location) {
           throw new HttpsError(
             'failed-precondition',
@@ -94,14 +83,12 @@ export const processClaim = onCall(
         }
       }
 
-      // Update application status to DISBURSED
       await applicationRef.update({
         status: 'DISBURSED',
         disbursedAt: new Date(),
         updatedAt: new Date(),
       });
 
-      // Update assistance history record
       const historyQuery = await db
         .collection('assistanceHistory')
         .where('applicationId', '==', applicationId)
