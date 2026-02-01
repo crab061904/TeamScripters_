@@ -92,7 +92,7 @@ export default function SignInScreen() {
                 <Ionicons name="person" size={40} color="#3B1C6D" />
               </View>
               <Text className="text-2xl font-poppins-bold text-white mb-2">
-                Welcome Back
+                Welcome to MyNaga App
               </Text>
               <Text className="text-white/90 text-sm font-poppins-reg text-center">
                 Sign in to access your Naga City Services
@@ -250,13 +250,7 @@ export default function SignInScreen() {
                 Don't have an account?{" "}
               </Text>
               <TouchableOpacity
-                onPress={() => {
-                  // TODO: Navigate to sign-up when implemented
-                  Alert.alert(
-                    "Coming Soon",
-                    "Sign up functionality will be available soon.",
-                  );
-                }}
+                onPress={() => router.push("/sign-up")}
                 disabled={isLoading}
               >
                 <Text className="text-[#FF4500] dark:text-[#FF6B35] font-poppins-semibold text-sm">
