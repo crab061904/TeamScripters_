@@ -37,8 +37,7 @@
         }
       ],
       "expo-barcode-scanner",
-      "expo-font",
-      "@react-native-community/datetimepicker"
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,
