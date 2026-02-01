@@ -1,10 +1,16 @@
 // src/context/AuthContext.tsx - Global Auth State
-import { User as FirebaseUser, onAuthStateChanged } from 'firebase/auth';
-import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { auth } from '../config/firebase';
-import { checkEmailVerification } from '../services/authService';
-import { getUserProfile } from '../services/userService';
-import { AuthUser, UserProfile } from '../types/schema';
+import { User as FirebaseUser, onAuthStateChanged } from "firebase/auth";
+import React, {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { auth } from "../config/firebase";
+import { checkEmailVerification } from "../services/authService";
+import { getUserProfile } from "../services/userService";
+import { AuthUser, UserProfile } from "../types/schema";
 
 interface AuthContextType {
   user: FirebaseUser | null;
@@ -36,7 +42,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
-      
+
       if (firebaseUser) {
         try {
           // Check email verification status
@@ -46,18 +52,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // Get user profile from Firestore
           const profile = await getUserProfile(firebaseUser.uid);
           setUserProfile(profile);
-          
+
           if (profile) {
             // Check if user is banned
             if (profile.isBanned) {
               const bannedUntil = profile.bannedUntil;
               if (bannedUntil && new Date(bannedUntil) > new Date()) {
                 // User is still banned
-                console.warn('User is banned until:', bannedUntil);
+                console.warn("User is banned until:", bannedUntil);
               } else if (bannedUntil && new Date(bannedUntil) <= new Date()) {
                 // Ban expired, update profile
                 // This should be handled by a Cloud Function, but we can update locally
-                console.log('Ban period expired');
+                console.log("Ban period expired");
               }
             }
 
@@ -67,18 +73,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               emailVerified: emailVerified,
               role: profile.role,
               accessLevel: profile.accessLevel,
-              registrationStatus: profile.registrationStatus
+              registrationStatus: profile.registrationStatus,
             });
           }
         } catch (error) {
-          console.error('Error fetching user profile:', error);
+          console.error("Error fetching user profile:", error);
         }
       } else {
         setUserProfile(null);
         setAuthUser(null);
         setIsEmailVerified(false);
       }
-      
+
       setIsLoading(false);
     });
 
@@ -86,12 +92,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   // Computed properties
-  const isAdmin = authUser?.role === 'admin';
-  const isEmployee = authUser?.role === 'employee';
-  const isBHW = authUser?.role === 'bhw';
-  const isResident = authUser?.role === 'resident';
-  const isProfileComplete = userProfile?.registrationStatus === 'full';
-  const canAccessTier2 = isEmailVerified && userProfile?.registrationStatus !== 'pending';
+  const isAdmin = authUser?.role === "admin";
+  const isEmployee = authUser?.role === "employee";
+  const isBHW = authUser?.role === "bhw";
+  const isResident = authUser?.role === "resident";
+  const isProfileComplete = userProfile?.registrationStatus === "full";
+  const canAccessTier2 =
+    isEmailVerified && userProfile?.registrationStatus !== "pending";
 
   const value: AuthContextType = {
     user,
@@ -104,20 +111,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isResident,
     isProfileComplete,
     isEmailVerified,
-    canAccessTier2
+    canAccessTier2,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

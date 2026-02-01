@@ -7,6 +7,7 @@ import {
 } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { TouchableOpacity, Text } from "react-native";
 import "react-native-reanimated";
 import "./../global.css";
 import * as SplashScreen from "expo-splash-screen";
@@ -79,6 +80,37 @@ export default function RootLayout() {
                 fontFamily: "Poppins_400Regular",
                 fontSize: 16,
               },
+            }}
+          />
+          <Stack.Screen
+            name="notifications"
+            options={{
+              title: "Notifications",
+              headerStyle: {
+                backgroundColor: colorScheme === "dark" ? "#1E1D23" : "#FFFFFF",
+              },
+              headerTintColor: colorScheme === "dark" ? "#FFFFFF" : "#3B1C6D",
+              headerTitleStyle: {
+                fontFamily: "Poppins_600SemiBold",
+                fontSize: 18,
+              },
+              headerBackTitleStyle: {
+                fontFamily: "Poppins_400Regular",
+                fontSize: 16,
+              },
+              headerRight: () => (
+                <TouchableOpacity onPress={() => {}}>
+                  <Text
+                    style={{
+                      fontFamily: "Poppins_500Medium",
+                      fontSize: 14,
+                      color: colorScheme === "dark" ? "#818CF8" : "#6366F1",
+                    }}
+                  >
+                    Mark all as read
+                  </Text>
+                </TouchableOpacity>
+              ),
             }}
           />
           <Stack.Screen

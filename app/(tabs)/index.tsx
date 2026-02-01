@@ -37,13 +37,13 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaProvider>
-      <View className="flex-1  font-poppins-reg dark:text-white">
+      <SafeAreaView className="flex-1 font-poppins-reg dark:text-white">
         <ScrollView
           showsVerticalScrollIndicator={false}
           className="bg-indigo-100/30 dark:bg-[#2C2932] relative"
         >
           {/* Header Section */}
-          <View className="bg-orange-100 dark:bg-indigo-950/60 pt-12 pb-12 px-4 ">
+          <View className="bg-orange-100 dark:bg-indigo-950/60 pt-8 pb-12 px-4 ">
             <View className="flex-row justify-between items-center mb-6">
               <View className="flex-row items-center w-full bg-white/80 dark:bg-[#1E1D23] p-2 rounded-full flex-1 mr-4 flex-row items-center px-4 h-10 shadow-sm">
                 <Feather
@@ -58,7 +58,10 @@ export default function HomeScreen() {
                   className="pl-3 focus:outline-none w-full"
                 />
               </View>
-              <TouchableOpacity className="bg-white/80 dark:bg-[#1E1D23] p-2 rounded-full shadow-sm">
+              <TouchableOpacity
+                className="bg-white/80 dark:bg-[#1E1D23] p-2 rounded-full shadow-sm"
+                onPress={() => router.push("/notifications")}
+              >
                 <Ionicons
                   name="notifications-outline"
                   size={20}
@@ -180,7 +183,7 @@ export default function HomeScreen() {
 
           <ProgramBenefits />
         </ScrollView>
-      </View>
+      </SafeAreaView>
     </SafeAreaProvider>
   );
 }
