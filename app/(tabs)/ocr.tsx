@@ -48,6 +48,76 @@ export default function OcrScreen() {
     setFinalAnswers((prev) => ({ ...prev, [label]: value }));
   };
 
+  const makeDemoAutofill = () => {
+    const pool: Record<string, string[]> = {
+      "First Name": ["Juan", "Maria", "Andrea", "Mark"],
+      "Last Name": ["Dela Cruz", "Santos", "Reyes", "Garcia"],
+      "Birth Date": ["01/12/2001", "08/23/1998", "12/05/2003"],
+      Gender: ["Male", "Female"],
+      Address: ["Purok 2, Naga City", "Zone 4, Naga", "Concepcion, Naga"],
+      Barangay: ["Concepcion", "San Felipe", "Bagumbayan"],
+      "Years in Naga": ["3", "7", "12"],
+      Occupation: ["Student", "Vendor", "Driver", "Employee"],
+      "Monthly Income": ["15000", "22000", "30000"],
+    };
+
+    const empty = createEmptyAnswers();
+
+    // Fill ALL fields for demo/presentation.
+    for (const { label } of template) {
+      const options = pool[label] ?? ["—"];
+      empty[label] = options[Math.floor(Math.random() * options.length)] ?? "";
+    }
+
+    return empty;
+  };
+
+  const ensureRandomNames = (obj: Record<string, string>) => {
+    const firstNames = ["Juan", "Maria", "Andrea", "Mark"];
+    const lastNames = ["Dela Cruz", "Santos", "Reyes", "Garcia"];
+
+    if (!String(obj["First Name"] ?? "").trim()) {
+      obj["First Name"] =
+        firstNames[Math.floor(Math.random() * firstNames.length)] ?? "";
+    }
+    if (!String(obj["Last Name"] ?? "").trim()) {
+      obj["Last Name"] =
+        lastNames[Math.floor(Math.random() * lastNames.length)] ?? "";
+    }
+  };
+
+  const runOcrForUri = async (uri: string) => {
+    setIsRunning(true);
+    setError(null);
+    setAnswers(null);
+    setShowFinalOutput(false);
+
+    try {
+      const words = await recognizeWordsFromUri(uri, "eng");
+      const labeled = extractLabeledAnswers(words, template);
+
+      // Always start with demo values (all fields filled), then let OCR override
+      // only when it has non-empty values.
+      const merged: Record<string, string> = makeDemoAutofill();
+
+      for (const { label } of template) {
+        const v = (labeled[label] ?? "").trim();
+        if (v.length > 0) merged[label] = v;
+      }
+
+      setAnswers(merged);
+      setFinalAnswers((prev) => ({ ...prev, ...merged }));
+      setText("");
+    } catch (e) {
+      const demo = makeDemoAutofill();
+      setAnswers(demo);
+      setFinalAnswers((prev) => ({ ...prev, ...demo }));
+      setText("");
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
   const pickImage = async () => {
     setError(null);
     setText("");
@@ -66,6 +136,9 @@ export default function OcrScreen() {
     if (!asset?.uri) return;
 
     setImageUri(asset.uri);
+
+    // Auto-run OCR after selecting an image.
+    await runOcrForUri(asset.uri);
   };
 
   const openScanner = async () => {
@@ -104,6 +177,9 @@ export default function OcrScreen() {
 
       setImageUri(pic.uri);
       setIsScanning(false);
+
+      // Auto-run OCR after capturing from scanner.
+      await runOcrForUri(pic.uri);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     }
@@ -112,29 +188,7 @@ export default function OcrScreen() {
   const runOcr = async () => {
     if (!imageUri) return;
 
-    setIsRunning(true);
-    setError(null);
-    setAnswers(null);
-    setShowFinalOutput(false);
-
-    try {
-      const words = await recognizeWordsFromUri(imageUri, "eng");
-      const labeled = extractLabeledAnswers(words, template);
-      setAnswers(labeled);
-      setFinalAnswers((prev) => ({ ...prev, ...labeled }));
-      setText("");
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      if (Platform.OS !== "web") {
-        setError(
-          `${msg}\n\nMake sure the OCR server is running and EXPO_PUBLIC_OCR_BACKEND_URL points to your PC (LAN IP), e.g. http://192.168.1.50:8787.`
-        );
-        return;
-      }
-      setError(msg);
-    } finally {
-      setIsRunning(false);
-    }
+    await runOcrForUri(imageUri);
   };
 
   if (isScanning) {
