@@ -1,52 +1,43 @@
-// src/types/schema.ts - Sanggawadan Data Schema
-
-export interface PersonalProfile {
-  firstName: string;
-  lastName: string;
-  birthDate: string; // ISO format for easy age calculation
-  gender: 'M' | 'F' | 'Non-Binary';
-}
-
-export interface ResidencyProfile {
-  address: string;
-  barangay: string;
-  yearsInNaga: number;
-}
-
-export interface SocioEconomicProfile {
-  monthlyIncome: number;
-  is4Ps: boolean;
-  isSSS_GSIS: boolean;
-  occupation: string;
-}
-
-export interface ComputedProfile {
-  age: number;
-  ageGroup: 'student' | 'adult' | 'senior';
-  statusColor: 'Green' | 'Yellow' | 'Orange' | 'Gray';
-}
-
+// User types for the application
 export interface UserProfile {
   uid: string;
-  role: 'citizen' | 'admin' | 'bhw';
-  registrationStatus: 'partial' | 'full';
-  createdAt: number;
-  profile: {
-    personal: PersonalProfile;
-    residency: ResidencyProfile;
-    socioEconomic: SocioEconomicProfile;
+  email: string;
+  role: 'admin' | 'bhw' | 'citizen';
+  registrationStatus: 'pending' | 'partial' | 'full';
+  firstName?: string;
+  lastName?: string;
+  middleName?: string;
+  phoneNumber?: string;
+  address?: string;
+  birthDate?: string;
+  gender?: 'male' | 'female' | 'other';
+  emergencyContact?: {
+    name: string;
+    relationship: string;
+    phoneNumber: string;
   };
-  computed: ComputedProfile;
-  documents?: Record<string, {
-    url: string;
-    expiryDate: number;
-    isVerified: boolean;
-  }>;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface AuthUser {
   uid: string;
   email: string;
-  role: 'citizen' | 'admin' | 'bhw';
-  registrationStatus: 'partial' | 'full';
+  role: 'admin' | 'bhw' | 'citizen';
+  registrationStatus: 'pending' | 'partial' | 'full';
+}
+
+export interface UserRegistration {
+  firstName: string;
+  lastName: string;
+  middleName?: string;
+  phoneNumber: string;
+  address: string;
+  birthDate: string;
+  gender: 'male' | 'female' | 'other';
+  emergencyContact: {
+    name: string;
+    relationship: string;
+    phoneNumber: string;
+  };
 }
