@@ -10,7 +10,8 @@ import {
 import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 import { Ionicons, Feather, FontAwesome6 } from "@expo/vector-icons";
 import "../../global.css";
-import { useColorScheme } from "nativewind";
+import { useAuth } from "@/src/context/AuthContext";
+import { router } from "expo-router";
 
 import ProgramBenefits from "@/components/ProgramBenefits/ProgramBenefits";
 
@@ -29,33 +30,20 @@ const SERVICES = [
 ];
 
 export default function HomeScreen() {
-  const { colorScheme, toggleColorScheme } = useColorScheme(); //
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [showAll, setShowAll] = useState(false);
   const [visibleServices, setVisibleServices] = useState(SERVICES.slice(0, 7));
 
   return (
     <SafeAreaProvider>
-      <View className="flex-1  font-poppins-reg dark:text-white">
+      <SafeAreaView className="flex-1 font-poppins-reg dark:text-white">
         <ScrollView
           showsVerticalScrollIndicator={false}
           className="bg-indigo-100/30 dark:bg-[#2C2932] relative"
         >
-          <Pressable
-            onPress={toggleColorScheme}
-            className="absolute z-10 top-0 right-0 flex-row items-center p-4 bg-gray-100 dark:bg-slate-800 rounded-2xl"
-          >
-            <Ionicons
-              name={colorScheme === "dark" ? "moon" : "sunny"}
-              size={24}
-              color={colorScheme === "dark" ? "#FFFFFF" : "#000000"}
-            />
-            <Text className="ml-3 font-poppins-bold text-black dark:text-white">
-              Switch to {colorScheme === "dark" ? "Light" : "Dark"} Mode
-            </Text>
-          </Pressable>
           {/* Header Section */}
-          <View className="bg-orange-100 dark:bg-indigo-950/60 pt-12 pb-8 px-4 ">
+          <View className="bg-orange-100 dark:bg-indigo-950/60 pt-8 pb-12 px-4 ">
             <View className="flex-row justify-between items-center mb-6">
               <View className="flex-row items-center w-full bg-white/80 dark:bg-[#1E1D23] p-2 rounded-full flex-1 mr-4 flex-row items-center px-4 h-10 shadow-sm">
                 <Feather
@@ -70,7 +58,10 @@ export default function HomeScreen() {
                   className="pl-3 focus:outline-none w-full"
                 />
               </View>
-              <TouchableOpacity className="bg-white/80 dark:bg-[#1E1D23] p-2 rounded-full shadow-sm">
+              <TouchableOpacity
+                className="bg-white/80 dark:bg-[#1E1D23] p-2 rounded-full shadow-sm"
+                onPress={() => router.push("/notifications")}
+              >
                 <Ionicons
                   name="notifications-outline"
                   size={20}
@@ -82,23 +73,28 @@ export default function HomeScreen() {
             <Text className="text-[#3B1C6D] dark:text-white text-2xl font-poppins-bold">
               Marhay na aga
             </Text>
-            <TouchableOpacity className="flex-row items-center mt-2">
-              <View className="flex-row items-center bg-white p-2  rounded-full">
-                <Text className="text-[#3B1C6D] font-poppins-reg text-xs">
-                  Create your account
-                </Text>
-                <Ionicons
-                  name="arrow-forward"
-                  size={18}
-                  color="#1E1B4B"
-                  className="ml-2"
-                />
-              </View>
-            </TouchableOpacity>
+            {!user && (
+              <TouchableOpacity
+                className="flex-row items-center mt-2"
+                onPress={() => router.push("/sign-up")}
+              >
+                <View className="flex-row items-center bg-white p-2  rounded-full">
+                  <Text className="text-[#3B1C6D] font-poppins-reg text-xs">
+                    Create your account
+                  </Text>
+                  <Ionicons
+                    name="arrow-forward"
+                    size={18}
+                    color="#1E1B4B"
+                    className="ml-2"
+                  />
+                </View>
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* Main Content Card */}
-          <View className=" rounded-t-3xl -mt-1">
+          <View className=" rounded-t-3xl -mt-5">
             <View className="px-4  pt-5   rounded-t-3xl bg-white dark:bg-[#1E1D23]">
               <Text className="font-poppins-semibold text-[#101828] dark:text-white  text-xl mb-6">
                 What would you like to do?
@@ -161,27 +157,33 @@ export default function HomeScreen() {
               </View>
             </View>
 
-            {/* Featured Banner (Help us improve our city) */}
-            <View className="px-4  mt-3 bg-white  dark:bg-[#1E1D23]">
-              <View className="bg-indigo-900 rounded-2xl p-4 mt-6 mb-10">
-                <Text className="text-white font-poppins-semibold text-lg">
-                  Help us improve our city
-                </Text>
-                <Text className="text-indigo-100 text-xs font-poppins-reg mb-4 pr-6">
-                  Create an account to report local issues directly to the city.
-                </Text>
-                <TouchableOpacity className="bg-white py-2 rounded-full items-center">
-                  <Text className="text-indigo-900 font-poppins-reg">
-                    Sign In
+            {/* Featured Banner (Help us improve our city) - Only show when not signed in */}
+            {!user && (
+              <View className="px-4  mt-3 bg-white  dark:bg-[#1E1D23]">
+                <View className="bg-indigo-900 rounded-2xl p-4 mt-6 mb-10">
+                  <Text className="text-white font-poppins-semibold text-lg">
+                    Help us improve our city
                   </Text>
-                </TouchableOpacity>
+                  <Text className="text-indigo-100 text-xs font-poppins-reg mb-4 pr-6">
+                    Create an account to report local issues directly to the
+                    city.
+                  </Text>
+                  <TouchableOpacity
+                    className="bg-white py-2 rounded-full items-center"
+                    onPress={() => router.push("/sign-in")}
+                  >
+                    <Text className="text-indigo-900 font-poppins-reg">
+                      Sign In
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
+            )}
           </View>
 
           <ProgramBenefits />
         </ScrollView>
-      </View>
+      </SafeAreaView>
     </SafeAreaProvider>
   );
 }

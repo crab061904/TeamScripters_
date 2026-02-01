@@ -1,12 +1,14 @@
 import React from "react";
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Switch } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { FontAwesome6, Ionicons, Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useAuth } from "@/src/context/AuthContext";
+import { useColorScheme } from "nativewind";
 
 export default function AccountScreen() {
   const { userProfile, user, isEmailVerified } = useAuth();
+  const { colorScheme, toggleColorScheme } = useColorScheme();
 
   const sections = [
     ...(userProfile
@@ -232,15 +234,21 @@ export default function AccountScreen() {
                   <View className="space-y-1">
                     {section.items.map((item, idx) => {
                       const IconComponent = item.lib;
+                      const isAppearanceItem = item.label === "Appearance";
+
                       return (
                         <TouchableOpacity
                           key={idx}
                           activeOpacity={0.7}
+                          onPress={
+                            isAppearanceItem ? toggleColorScheme : undefined
+                          }
                           className={`flex-row items-center justify-between py-3 ${
                             idx !== section.items.length - 1
                               ? "border-b border-indigo-50 dark:border-zinc-800"
                               : ""
                           }`}
+                          disabled={!isAppearanceItem}
                         >
                           <View className="flex-row items-center gap-4">
                             {/* Icon Box - Matches Home Screen Service Icons */}
@@ -255,11 +263,34 @@ export default function AccountScreen() {
                               {item.label}
                             </Text>
                           </View>
-                          <Feather
-                            name="chevron-right"
-                            size={20}
-                            className="text-gray-400 dark:text-gray-600"
-                          />
+                          {isAppearanceItem ? (
+                            <View className="flex-row items-center gap-3">
+                              <Ionicons
+                                name={colorScheme === "dark" ? "moon" : "sunny"}
+                                size={20}
+                                color={
+                                  colorScheme === "dark" ? "#F87171" : "#F59E0B"
+                                }
+                              />
+                              <Switch
+                                value={colorScheme === "dark"}
+                                onValueChange={toggleColorScheme}
+                                trackColor={{
+                                  false: "#E5E7EB",
+                                  true: "#4B5563",
+                                }}
+                                thumbColor={
+                                  colorScheme === "dark" ? "#F87171" : "#F59E0B"
+                                }
+                              />
+                            </View>
+                          ) : (
+                            <Feather
+                              name="chevron-right"
+                              size={20}
+                              className="text-gray-400 dark:text-gray-600"
+                            />
+                          )}
                         </TouchableOpacity>
                       );
                     })}
