@@ -1,4 +1,5 @@
 # Naga Assist Backend API Documentation
+
 ## Frontend Developer Guide
 
 **Version:** 1.0.0  
@@ -32,36 +33,38 @@ npm install firebase
 ### Initialize Firebase Functions
 
 ```typescript
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import { getAuth } from 'firebase/auth';
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { getAuth } from "firebase/auth";
 
 // Initialize functions
 const functions = getFunctions();
 
 // For local development (optional)
-import { connectFunctionsEmulator } from 'firebase/functions';
+import { connectFunctionsEmulator } from "firebase/functions";
 if (__DEV__) {
-  connectFunctionsEmulator(functions, 'localhost', 5001);
+  connectFunctionsEmulator(functions, "localhost", 5001);
 }
 ```
 
 ### Basic Function Call Pattern
 
 ```typescript
-import { httpsCallable } from 'firebase/functions';
-import { getFunctions } from 'firebase/functions';
+import { httpsCallable } from "firebase/functions";
+import { getFunctions } from "firebase/functions";
 
 const functions = getFunctions();
 
 // Create callable reference
-const myFunction = httpsCallable(functions, 'functionName');
+const myFunction = httpsCallable(functions, "functionName");
 
 // Call with data
 try {
-  const result = await myFunction({ /* input data */ });
+  const result = await myFunction({
+    /* input data */
+  });
   console.log(result.data); // Response data
 } catch (error: any) {
-  console.error('Error:', error.code, error.message);
+  console.error("Error:", error.code, error.message);
 }
 ```
 
@@ -74,7 +77,7 @@ try {
 All functions require an authenticated user. Ensure the user is logged in before calling any function:
 
 ```typescript
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 const auth = getAuth();
 
@@ -94,10 +97,10 @@ Some functions require admin privileges. Check user role before calling:
 
 ```typescript
 // Get user profile to check role
-const userDoc = await getDoc(doc(db, 'users', user.uid));
+const userDoc = await getDoc(doc(db, "users", user.uid));
 const userRole = userDoc.data()?.role;
 
-if (userRole === 'admin') {
+if (userRole === "admin") {
   // Safe to call admin functions
   verifyApplication();
 } else {
@@ -133,7 +136,7 @@ interface CheckEligibilityResponse {
     programId: string;
     programName: string;
     eligibility: {
-      status: 'ELIGIBLE' | 'POTENTIAL_MATCH' | 'LOCKED';
+      status: "ELIGIBLE" | "POTENTIAL_MATCH" | "LOCKED";
       matchScore: number; // 0-100
       missingRequirements: string[]; // Fields that failed mandatory gates
       gapDataChecklist?: string[]; // Fields missing data (for POTENTIAL_MATCH)
@@ -151,27 +154,27 @@ interface CheckEligibilityResponse {
 **Example Usage:**
 
 ```typescript
-import { httpsCallable } from 'firebase/functions';
-import { getFunctions } from 'firebase/functions';
+import { httpsCallable } from "firebase/functions";
+import { getFunctions } from "firebase/functions";
 
 const functions = getFunctions();
-const checkEligibility = httpsCallable(functions, 'checkEligibility');
+const checkEligibility = httpsCallable(functions, "checkEligibility");
 
 // Check specific program
 const checkSingleProgram = async (programId: string) => {
   try {
     const result = await checkEligibility({ programId });
     const eligibility = result.data.results[0];
-    
-    if (eligibility.eligibility.status === 'ELIGIBLE') {
+
+    if (eligibility.eligibility.status === "ELIGIBLE") {
       // Show "Apply Now" button
-    } else if (eligibility.eligibility.status === 'POTENTIAL_MATCH') {
+    } else if (eligibility.eligibility.status === "POTENTIAL_MATCH") {
       // Show "Complete Profile" with gapDataChecklist
     } else {
       // Don't show this program (LOCKED)
     }
   } catch (error: any) {
-    console.error('Error checking eligibility:', error);
+    console.error("Error checking eligibility:", error);
   }
 };
 
@@ -180,16 +183,16 @@ const checkAllPrograms = async () => {
   try {
     const result = await checkEligibility({});
     const eligiblePrograms = result.data.results.filter(
-      (r) => r.eligibility.status === 'ELIGIBLE'
+      (r) => r.eligibility.status === "ELIGIBLE",
     );
     const potentialMatches = result.data.results.filter(
-      (r) => r.eligibility.status === 'POTENTIAL_MATCH'
+      (r) => r.eligibility.status === "POTENTIAL_MATCH",
     );
-    
+
     // Display results
     return { eligiblePrograms, potentialMatches };
   } catch (error: any) {
-    console.error('Error:', error);
+    console.error("Error:", error);
     throw error;
   }
 };
@@ -230,7 +233,7 @@ interface SubmitApplicationRequest {
 interface SubmitApplicationResponse {
   applicationId: string;
   feeAmount: number; // PHP amount (0 if waived or N/A)
-  feeStatus: 'PAID' | 'WAIVED' | 'N/A';
+  feeStatus: "PAID" | "WAIVED" | "N/A";
 }
 ```
 
@@ -243,12 +246,12 @@ interface SubmitApplicationResponse {
 **Example Usage:**
 
 ```typescript
-const submitApplication = httpsCallable(functions, 'submitApplication');
+const submitApplication = httpsCallable(functions, "submitApplication");
 
 const handleSubmit = async (
   programId: string,
   documents: Record<string, string>,
-  appointment?: { date: string; time: string; location: string }
+  appointment?: { date: string; time: string; location: string },
 ) => {
   try {
     const result = await submitApplication({
@@ -259,22 +262,22 @@ const handleSubmit = async (
 
     const { applicationId, feeAmount, feeStatus } = result.data;
 
-    if (feeStatus === 'PAID' && feeAmount > 0) {
+    if (feeStatus === "PAID" && feeAmount > 0) {
       // Redirect to payment screen
       navigateToPayment(applicationId, feeAmount);
     } else {
       // Show success message
-      showSuccess('Application submitted successfully!');
+      showSuccess("Application submitted successfully!");
     }
 
     return applicationId;
   } catch (error: any) {
-    if (error.code === 'already-exists') {
-      showError('You already have a pending application for this program');
-    } else if (error.code === 'failed-precondition') {
-      showError('Program is not currently active');
+    if (error.code === "already-exists") {
+      showError("You already have a pending application for this program");
+    } else if (error.code === "failed-precondition") {
+      showError("Program is not currently active");
     } else {
-      showError('Failed to submit application. Please try again.');
+      showError("Failed to submit application. Please try again.");
     }
     throw error;
   }
@@ -293,11 +296,14 @@ const handleSubmit = async (
 
 ```typescript
 // 1. Upload document to Firebase Storage
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from './config/firebase';
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "./config/firebase";
 
 const uploadDocument = async (file: File, documentType: string) => {
-  const storageRef = ref(storage, `documents/${userId}/${documentType}_${Date.now()}`);
+  const storageRef = ref(
+    storage,
+    `documents/${userId}/${documentType}_${Date.now()}`,
+  );
   await uploadBytes(storageRef, file);
   const url = await getDownloadURL(storageRef);
   return url;
@@ -305,13 +311,13 @@ const uploadDocument = async (file: File, documentType: string) => {
 
 // 2. Collect all document URLs
 const documents = {
-  birthCertificate: await uploadDocument(file1, 'birthCertificate'),
-  barangayClearance: await uploadDocument(file2, 'barangayClearance'),
+  birthCertificate: await uploadDocument(file1, "birthCertificate"),
+  barangayClearance: await uploadDocument(file2, "barangayClearance"),
 };
 
 // 3. Submit application with document URLs
 await submitApplication({
-  programId: 'program123',
+  programId: "program123",
   uploadedDocuments: documents,
 });
 ```
@@ -331,7 +337,7 @@ await submitApplication({
 ```typescript
 interface VerifyApplicationRequest {
   applicationId: string;
-  action: 'APPROVE' | 'REJECT';
+  action: "APPROVE" | "REJECT";
   rejectionReason?: string; // Required if action is 'REJECT'
 }
 ```
@@ -348,47 +354,44 @@ interface VerifyApplicationResponse {
 **Example Usage:**
 
 ```typescript
-const verifyApplication = httpsCallable(functions, 'verifyApplication');
+const verifyApplication = httpsCallable(functions, "verifyApplication");
 
 // Approve application
 const approveApplication = async (applicationId: string) => {
   try {
     const result = await verifyApplication({
       applicationId,
-      action: 'APPROVE',
+      action: "APPROVE",
     });
-    
+
     showSuccess(result.data.message);
     // Refresh application list
     refreshApplications();
   } catch (error: any) {
-    if (error.code === 'permission-denied') {
-      showError('Admin access required');
+    if (error.code === "permission-denied") {
+      showError("Admin access required");
     } else {
-      showError('Failed to approve application');
+      showError("Failed to approve application");
     }
   }
 };
 
 // Reject application
-const rejectApplication = async (
-  applicationId: string,
-  reason: string
-) => {
+const rejectApplication = async (applicationId: string, reason: string) => {
   try {
     const result = await verifyApplication({
       applicationId,
-      action: 'REJECT',
+      action: "REJECT",
       rejectionReason: reason,
     });
-    
-    showSuccess('Application rejected');
+
+    showSuccess("Application rejected");
     refreshApplications();
   } catch (error: any) {
-    if (error.code === 'invalid-argument') {
-      showError('Rejection reason is required');
+    if (error.code === "invalid-argument") {
+      showError("Rejection reason is required");
     } else {
-      showError('Failed to reject application');
+      showError("Failed to reject application");
     }
   }
 };
@@ -434,6 +437,7 @@ interface ProcessClaimResponse {
 **QR Code Format:**
 
 The QR code can be in two formats:
+
 1. `"NAGA_ASSIST:applicationId"` (prefixed)
 2. `"applicationId"` (just the ID)
 
@@ -492,7 +496,7 @@ const scanQRCode = async () => {
 - `unauthenticated`: User not logged in
 - `invalid-argument`: Invalid QR code format
 - `not-found`: Application not found
-- `failed-precondition`: 
+- `failed-precondition`:
   - Application not APPROVED
   - Appointment date/time not reached
   - Location mismatch (if location provided)
@@ -509,16 +513,16 @@ interface UserDocument {
   firstName: string;
   lastName: string;
   birthDate: string; // ISO format: "YYYY-MM-DD"
-  sex: 'M' | 'F' | 'Non-Binary';
+  sex: "M" | "F" | "Non-Binary";
   barangay: string;
   socioEconomicProfile: {
-    housingStatus: 'OWNED' | 'RENTED' | 'PUBLIC_SPACE';
-    housingMaterials: 'LIGHT' | 'SEMI_CONCRETE' | 'CONCRETE';
+    housingStatus: "OWNED" | "RENTED" | "PUBLIC_SPACE";
+    housingMaterials: "LIGHT" | "SEMI_CONCRETE" | "CONCRETE";
     utilities: {
       waterSource: string;
       lightingSource: string;
     };
-    monthlyIncome: 'BELOW_10K' | '10K_15K' | '15K_20K' | 'ABOVE_20K';
+    monthlyIncome: "BELOW_10K" | "10K_15K" | "15K_20K" | "ABOVE_20K";
     assets: string[]; // e.g., ['TV', 'Refrigerator', 'Tricycle']
     isSoloParent: boolean;
     isPWD: boolean;
@@ -535,10 +539,10 @@ interface UserDocument {
 interface ProgramDocument {
   name: string;
   department: string;
-  status: 'DRAFT' | 'ACTIVE' | 'ARCHIVED';
+  status: "DRAFT" | "ACTIVE" | "ARCHIVED";
   eligibilityRules: Array<{
     field: string; // Dot-notation path, e.g., "socioEconomicProfile.isPWD" or "age"
-    operator: '==' | '>=' | '<=' | 'array-contains';
+    operator: "==" | ">=" | "<=" | "array-contains";
     value: any;
     isMandatory: boolean; // true = mandatory gate, false = informational gate
   }>;
@@ -557,8 +561,8 @@ interface ProgramDocument {
 interface ApplicationDocument {
   userId: string;
   programId: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'DISBURSED';
-  feeStatus: 'PAID' | 'WAIVED' | 'N/A';
+  status: "PENDING" | "APPROVED" | "REJECTED" | "DISBURSED";
+  feeStatus: "PAID" | "WAIVED" | "N/A";
   feeAmount: number; // PHP amount (0 if waived or N/A)
   uploadedDocuments: Record<string, string>; // Document type -> Storage URL
   rejectionReason?: string;
@@ -591,51 +595,51 @@ interface HttpsError {
 
 ### Error Codes Reference
 
-| Code | HTTP Status | Description | Action |
-|------|-------------|-------------|--------|
-| `unauthenticated` | 401 | User not logged in | Redirect to login |
-| `permission-denied` | 403 | Insufficient permissions | Show access denied message |
-| `not-found` | 404 | Resource not found | Show "Not found" message |
-| `invalid-argument` | 400 | Invalid input data | Show validation error |
-| `failed-precondition` | 412 | Business rule violation | Show specific error message |
-| `already-exists` | 409 | Duplicate resource | Show "Already exists" message |
-| `internal` | 500 | Server error | Show generic error, retry option |
+| Code                  | HTTP Status | Description              | Action                           |
+| --------------------- | ----------- | ------------------------ | -------------------------------- |
+| `unauthenticated`     | 401         | User not logged in       | Redirect to login                |
+| `permission-denied`   | 403         | Insufficient permissions | Show access denied message       |
+| `not-found`           | 404         | Resource not found       | Show "Not found" message         |
+| `invalid-argument`    | 400         | Invalid input data       | Show validation error            |
+| `failed-precondition` | 412         | Business rule violation  | Show specific error message      |
+| `already-exists`      | 409         | Duplicate resource       | Show "Already exists" message    |
+| `internal`            | 500         | Server error             | Show generic error, retry option |
 
 ### Error Handling Utility
 
 ```typescript
 const handleFunctionError = (error: any) => {
   switch (error.code) {
-    case 'unauthenticated':
+    case "unauthenticated":
       // Redirect to login
-      navigate('/login');
+      navigate("/login");
       break;
-    case 'permission-denied':
-      showError('You do not have permission to perform this action');
+    case "permission-denied":
+      showError("You do not have permission to perform this action");
       break;
-    case 'not-found':
-      showError('Resource not found');
+    case "not-found":
+      showError("Resource not found");
       break;
-    case 'invalid-argument':
+    case "invalid-argument":
       showError(`Invalid input: ${error.message}`);
       break;
-    case 'failed-precondition':
+    case "failed-precondition":
       showError(error.message);
       break;
-    case 'already-exists':
-      showError('This resource already exists');
+    case "already-exists":
+      showError("This resource already exists");
       break;
-    case 'internal':
-      showError('An error occurred. Please try again.');
+    case "internal":
+      showError("An error occurred. Please try again.");
       break;
     default:
-      showError('An unexpected error occurred');
+      showError("An unexpected error occurred");
   }
 };
 
 // Usage
 try {
-  await checkEligibility({ programId: '123' });
+  await checkEligibility({ programId: "123" });
 } catch (error) {
   handleFunctionError(error);
 }
@@ -664,7 +668,7 @@ const HomeScreen = () => {
     try {
       setLoading(true);
       const result = await checkEligibility({});
-      
+
       const eligible = result.data.results.filter(
         (r) => r.eligibility.status === 'ELIGIBLE'
       );
@@ -887,22 +891,22 @@ Create a service file to centralize all function calls:
 
 ```typescript
 // services/functions.ts
-import { getFunctions, httpsCallable } from 'firebase/functions';
+import { getFunctions, httpsCallable } from "firebase/functions";
 
 const functions = getFunctions();
 
 // Initialize all callable functions
-export const checkEligibility = httpsCallable(functions, 'checkEligibility');
-export const submitApplication = httpsCallable(functions, 'submitApplication');
-export const verifyApplication = httpsCallable(functions, 'verifyApplication');
-export const processClaim = httpsCallable(functions, 'processClaim');
+export const checkEligibility = httpsCallable(functions, "checkEligibility");
+export const submitApplication = httpsCallable(functions, "submitApplication");
+export const verifyApplication = httpsCallable(functions, "verifyApplication");
+export const processClaim = httpsCallable(functions, "processClaim");
 
 // Type definitions
 export interface EligibilityResult {
   programId: string;
   programName: string;
   eligibility: {
-    status: 'ELIGIBLE' | 'POTENTIAL_MATCH' | 'LOCKED';
+    status: "ELIGIBLE" | "POTENTIAL_MATCH" | "LOCKED";
     matchScore: number;
     missingRequirements: string[];
     gapDataChecklist?: string[];
@@ -924,8 +928,8 @@ export const checkEligibilitySafe = async (programId?: string) => {
 
 ```typescript
 // hooks/useEligibility.ts
-import { useState, useEffect } from 'react';
-import { checkEligibilitySafe } from '../services/functions';
+import { useState, useEffect } from "react";
+import { checkEligibilitySafe } from "../services/functions";
 
 export const useEligibility = (programId?: string) => {
   const [loading, setLoading] = useState(true);
@@ -940,19 +944,19 @@ export const useEligibility = (programId?: string) => {
   const loadEligibility = async () => {
     setLoading(true);
     setError(null);
-    
+
     const result = await checkEligibilitySafe(programId);
-    
+
     if (result.success) {
       const results = result.data.results;
-      setEligible(results.filter((r) => r.eligibility.status === 'ELIGIBLE'));
+      setEligible(results.filter((r) => r.eligibility.status === "ELIGIBLE"));
       setPotential(
-        results.filter((r) => r.eligibility.status === 'POTENTIAL_MATCH')
+        results.filter((r) => r.eligibility.status === "POTENTIAL_MATCH"),
       );
     } else {
       setError(result.message);
     }
-    
+
     setLoading(false);
   };
 
@@ -975,34 +979,36 @@ export const checkEligibility = jest.fn(() =>
     data: {
       results: [
         {
-          programId: 'program1',
-          programName: 'Senior Citizen ID',
+          programId: "program1",
+          programName: "Senior Citizen ID",
           eligibility: {
-            status: 'ELIGIBLE',
+            status: "ELIGIBLE",
             matchScore: 100,
             missingRequirements: [],
           },
         },
       ],
     },
-  })
+  }),
 );
 ```
 
 ### Testing with Firebase Emulator
 
 1. Start emulator:
+
 ```bash
 cd functions
 npm run serve
 ```
 
 2. Connect to emulator in your app:
+
 ```typescript
-import { connectFunctionsEmulator } from 'firebase/functions';
+import { connectFunctionsEmulator } from "firebase/functions";
 
 if (__DEV__) {
-  connectFunctionsEmulator(functions, 'localhost', 5001);
+  connectFunctionsEmulator(functions, "localhost", 5001);
 }
 ```
 
@@ -1015,7 +1021,7 @@ if (__DEV__) {
 **A:** Ensure the user is logged in before calling functions. Check authentication state:
 
 ```typescript
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged } from "firebase/auth";
 
 onAuthStateChanged(auth, (user) => {
   if (user) {
@@ -1029,7 +1035,7 @@ onAuthStateChanged(auth, (user) => {
 **A:** Show a "Complete Profile" prompt with the `gapDataChecklist` fields. Guide users to fill missing data:
 
 ```typescript
-if (eligibility.status === 'POTENTIAL_MATCH') {
+if (eligibility.status === "POTENTIAL_MATCH") {
   // Show modal or navigate to profile completion
   showGapDataModal(eligibility.gapDataChecklist);
 }
@@ -1037,13 +1043,15 @@ if (eligibility.status === 'POTENTIAL_MATCH') {
 
 ### Q: What's the difference between missingRequirements and gapDataChecklist?
 
-**A:** 
+**A:**
+
 - `missingRequirements`: Fields that failed mandatory gates (user is LOCKED)
 - `gapDataChecklist`: Fields with missing data for informational gates (user is POTENTIAL_MATCH)
 
 ### Q: How do I know if a fee needs to be paid?
 
 **A:** Check the `feeStatus` in the response:
+
 - `PAID` + `feeAmount > 0`: Show payment UI
 - `WAIVED`: Fee is waived (indigent user)
 - `N/A`: No fee required
@@ -1055,6 +1063,7 @@ if (eligibility.status === 'POTENTIAL_MATCH') {
 ### Q: How do I format the QR code for processClaim?
 
 **A:** The function accepts both formats:
+
 - `"NAGA_ASSIST:applicationId"` (prefixed)
 - `"applicationId"` (just the ID)
 
@@ -1067,6 +1076,7 @@ if (eligibility.status === 'POTENTIAL_MATCH') {
 ## Support
 
 For questions or issues:
+
 1. Check the error code and message
 2. Review this documentation
 3. Check the backend logs (if you have access)

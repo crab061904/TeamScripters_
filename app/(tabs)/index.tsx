@@ -12,6 +12,8 @@ import { Ionicons, Feather, FontAwesome6 } from "@expo/vector-icons";
 import "../../global.css";
 import { useColorScheme } from "nativewind";
 
+import ProgramBenefits from "@/components/ProgramBenefits/ProgramBenefits";
+
 const SERVICES = [
   { id: 1, label: "Services", icon: "gear" },
   { id: 2, label: "Citizen Guide", icon: "book" },
@@ -175,27 +177,9 @@ export default function HomeScreen() {
                 </TouchableOpacity>
               </View>
             </View>
-
-            {/* Explore Naga */}
-            <View className="px-4  pt-5  mt-2 bg-white  dark:bg-[#1E1D23]">
-              <Text className="font-poppins-semibold text-[#101828] dark:text-white  text-xl mb-6">
-                Explore Naga
-              </Text>
-              <View className="bg-indigo-900 rounded-2xl p-4 mt-6 mb-10">
-                <Text className="text-white font-poppins-semibold text-lg">
-                  Help us improve our city
-                </Text>
-                <Text className="text-indigo-100 text-xs font-poppins-reg mb-4 pr-6">
-                  Create an account to report local issues directly to the city.
-                </Text>
-                <TouchableOpacity className="bg-white py-2 rounded-full items-center">
-                  <Text className="text-indigo-900 font-poppins-reg">
-                    Sign In
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
           </View>
+
+          <ProgramBenefits />
         </ScrollView>
       </View>
     </SafeAreaProvider>
