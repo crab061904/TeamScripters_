@@ -99,15 +99,16 @@ export default function RootLayout() {
                 fontSize: 16,
               },
               headerRight: () => (
-                <TouchableOpacity onPress={() => {}}>
+                <TouchableOpacity onPress={() => {}} className="px-2">
                   <Text
                     style={{
-                      fontFamily: "Poppins_500Medium",
-                      fontSize: 14,
+                      fontSize: 12,
                       color: colorScheme === "dark" ? "#818CF8" : "#6366F1",
                     }}
+                    className="font-poppins-semibold"
+                    numberOfLines={1}
                   >
-                    Mark all as read
+                    Mark all read
                   </Text>
                 </TouchableOpacity>
               ),
