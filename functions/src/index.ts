@@ -1,12 +1,14 @@
-/**
- * Firebase Cloud Functions Entry Point
- * Exports all HTTPS Callable functions for Naga Assist
- */
-
 import { checkEligibility } from './functions/checkEligibility';
+import { processClaim } from './functions/processClaim';
 import { submitApplication } from './functions/submitApplication';
 import { verifyApplication } from './functions/verifyApplication';
-import { processClaim } from './functions/processClaim';
+import { assignRole, manageUserBan } from './functions/assignRole';
 
-// Export all functions
-export { checkEligibility, submitApplication, verifyApplication, processClaim };
+export {
+  checkEligibility,
+  processClaim,
+  submitApplication,
+  verifyApplication,
+  assignRole,
+  manageUserBan,
+};

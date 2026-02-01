@@ -1,8 +1,3 @@
-/**
- * Utility to access nested object fields using dot-notation
- * Supports both direct fields (e.g., 'age') and nested paths (e.g., 'socioEconomicProfile.isPWD')
- */
-
 export function getFieldValue(obj: any, path: string): any {
   const keys = path.split('.');
   let value = obj;
@@ -17,17 +12,11 @@ export function getFieldValue(obj: any, path: string): any {
   return value;
 }
 
-/**
- * Check if a field exists and has a non-null value
- */
 export function hasFieldValue(obj: any, path: string): boolean {
   const value = getFieldValue(obj, path);
   return value !== null && value !== undefined && value !== '';
 }
 
-/**
- * Calculate age from birthDate (ISO format)
- */
 export function calculateAge(birthDate: string): number {
   const birth = new Date(birthDate);
   const today = new Date();

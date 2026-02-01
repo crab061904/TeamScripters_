@@ -1,12 +1,19 @@
-import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { UserProfile, UserRegistration } from '../types/schema';
+import { Tier1Profile, UserProfile, UserRegistration } from '../types/schema';
 
 export const getUserProfile = async (uid: string): Promise<UserProfile | null> => {
   try {
     const userDoc = await getDoc(doc(db, 'users', uid));
     if (userDoc.exists()) {
-      return userDoc.data() as UserProfile;
+      const data = userDoc.data();
+      // Convert Firestore timestamps to Date objects
+      return {
+        ...data,
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate() || new Date(),
+        bannedUntil: data.bannedUntil?.toDate(),
+      } as UserProfile;
     }
     return null;
   } catch (error) {
@@ -15,16 +22,33 @@ export const getUserProfile = async (uid: string): Promise<UserProfile | null> =
   }
 };
 
-export const createUserProfile = async (uid: string, userData: Partial<UserProfile>): Promise<UserProfile> => {
+/**
+ * Create Tier 1 User Profile (Mandatory on Signup)
+ * This is called immediately after Firebase Auth user creation
+ */
+export const createUserProfile = async (
+  uid: string,
+  email: string,
+  tier1Data: Tier1Profile
+): Promise<UserProfile> => {
   try {
     const userProfile: UserProfile = {
       uid,
-      email: userData.email || '',
-      role: userData.role || 'citizen',
-      registrationStatus: 'pending',
+      email,
+      emailVerified: false,
+      role: 'resident',
+      accessLevel: 1, // Default access level for residents
+      registrationStatus: 'partial', // Partial = Tier 1 complete, Tier 2 pending
+      isBanned: false,
+      // Tier 1 Data (Required)
+      firstName: tier1Data.firstName,
+      lastName: tier1Data.lastName,
+      birthDate: tier1Data.birthDate,
+      sex: tier1Data.sex,
+      barangay: tier1Data.barangay,
+      // Tier 2 Data (Optional - will be added later)
       createdAt: new Date(),
       updatedAt: new Date(),
-      ...userData
     };
 
     await setDoc(doc(db, 'users', uid), userProfile);
@@ -47,6 +71,10 @@ export const updateUserProfile = async (uid: string, updates: Partial<UserProfil
   }
 };
 
+/**
+ * Complete Tier 2 Registration (Socio-Economic Profile)
+ * Updates registrationStatus to 'full' when Tier 2 data is added
+ */
 export const completeUserRegistration = async (uid: string, registrationData: UserRegistration): Promise<void> => {
   try {
     await updateUserProfile(uid, {
@@ -59,12 +87,35 @@ export const completeUserRegistration = async (uid: string, registrationData: Us
   }
 };
 
-export const getUsersByRole = async (role: 'admin' | 'bhw' | 'citizen'): Promise<UserProfile[]> => {
+/**
+ * Update email verification status
+ */
+export const updateEmailVerificationStatus = async (uid: string, verified: boolean): Promise<void> => {
+  try {
+    await updateDoc(doc(db, 'users', uid), {
+      emailVerified: verified,
+      updatedAt: new Date()
+    });
+  } catch (error) {
+    console.error('Error updating email verification status:', error);
+    throw error;
+  }
+};
+
+export const getUsersByRole = async (role: 'resident' | 'admin' | 'employee' | 'bhw'): Promise<UserProfile[]> => {
   try {
     const usersQuery = query(collection(db, 'users'), where('role', '==', role));
     const querySnapshot = await getDocs(usersQuery);
     
-    return querySnapshot.docs.map(doc => doc.data() as UserProfile);
+    return querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        ...data,
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate() || new Date(),
+        bannedUntil: data.bannedUntil?.toDate(),
+      } as UserProfile;
+    });
   } catch (error) {
     console.error('Error getting users by role:', error);
     throw error;

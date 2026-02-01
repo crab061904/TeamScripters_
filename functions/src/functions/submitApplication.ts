@@ -1,20 +1,15 @@
-/**
- * Cloud Function: submitApplication
- * Handles application submission with fee calculation and replacement detection
- */
-
-import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import { z } from 'zod';
 import { db } from '../config/firebase';
 import {
-  ApplicationDocument,
-  ApplicationSubmissionInput,
-  ProgramDocument,
-  UserDocument,
+    ApplicationDocument,
+    ApplicationSubmissionInput,
+    ProgramDocument,
+    UserDocument,
 } from '../types/firestore';
 import { calculateFee } from '../utils/feeCalculator';
+import { verifyResidentAccess } from '../utils/security';
 
-// Zod schema for input validation
 const submitApplicationSchema = z.object({
   programId: z.string().min(1, 'Program ID is required'),
   uploadedDocuments: z.record(z.string(), z.string()).optional().default({}),
@@ -27,9 +22,6 @@ const submitApplicationSchema = z.object({
     .optional(),
 });
 
-/**
- * Submit a new application for a benefit program
- */
 export const submitApplication = onCall(
   {
     cors: true,
@@ -37,7 +29,7 @@ export const submitApplication = onCall(
   },
   async (request): Promise<{ applicationId: string; feeAmount: number; feeStatus: string }> => {
     try {
-      // Verify authentication
+      
       const auth = request.auth;
       if (!auth) {
         throw new HttpsError('unauthenticated', 'User must be authenticated');
@@ -45,7 +37,9 @@ export const submitApplication = onCall(
 
       const userId = auth.uid;
 
-      // Validate input
+      // Security check: Verify user is not banned
+      await verifyResidentAccess(userId);
+
       const validationResult = submitApplicationSchema.safeParse(request.data);
       if (!validationResult.success) {
         throw new HttpsError(
@@ -56,7 +50,6 @@ export const submitApplication = onCall(
 
       const input: ApplicationSubmissionInput = validationResult.data;
 
-      // Fetch program
       const programDoc = await db.collection('programs').doc(input.programId).get();
       if (!programDoc.exists) {
         throw new HttpsError('not-found', 'Program not found');
@@ -67,7 +60,6 @@ export const submitApplication = onCall(
         throw new HttpsError('failed-precondition', 'Program is not active');
       }
 
-      // Fetch user profile
       const userDoc = await db.collection('users').doc(userId).get();
       if (!userDoc.exists) {
         throw new HttpsError('not-found', 'User profile not found');
@@ -75,7 +67,6 @@ export const submitApplication = onCall(
 
       const userData = userDoc.data() as UserDocument;
 
-      // Check for existing pending application
       const existingAppsQuery = await db
         .collection('applications')
         .where('userId', '==', userId)
@@ -90,10 +81,8 @@ export const submitApplication = onCall(
         );
       }
 
-      // Calculate fee
       const feeInfo = await calculateFee(program, userData, userId, input.programId);
 
-      // Create application document
       const applicationData: Omit<ApplicationDocument, 'userId' | 'programId'> = {
         status: 'PENDING',
         feeStatus: feeInfo.status,
