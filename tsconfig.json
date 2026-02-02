@@ -3,10 +3,9 @@
   "compilerOptions": {
     "strict": true,
     "jsx": "react-jsx",
+    "jsxImportSource": "nativewind",
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     }
   },
   "include": [
