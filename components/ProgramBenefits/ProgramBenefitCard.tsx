@@ -1,6 +1,6 @@
-import { View, Text, TouchableOpacity } from "react-native";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { Text, TouchableOpacity, View } from "react-native";
 
 interface BenefitProps {
   title: string;
@@ -13,6 +13,7 @@ interface BenefitProps {
   ctaText: string;
   location: string;
   schedule: string;
+  onPress?: () => void;
 }
 
 export default function ProgramBenefitCard({
@@ -26,6 +27,7 @@ export default function ProgramBenefitCard({
   ctaText,
   location,
   schedule,
+  onPress,
 }: BenefitProps) {
   // Dynamic color for the progress bar based on match
   const barColor =
@@ -39,6 +41,8 @@ export default function ProgramBenefitCard({
   return (
     <TouchableOpacity
       activeOpacity={0.7}
+      onPress={isLocked ? undefined : onPress}
+      disabled={isLocked || !onPress}
       className={`flex-col gap-4 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl p-5 mb-4 shadow-sm ${isLocked ? "opacity-60" : ""}`}
     >
       <View className="flex-row items-center justify-between">

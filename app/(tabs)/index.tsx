@@ -1,19 +1,22 @@
+import { useAuth } from "@/src/context/AuthContext";
+import { Feather, FontAwesome6, Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { useState } from "react";
 import {
-  Text,
-  ScrollView,
-  View,
-  TouchableOpacity,
-  TextInput,
-  Pressable,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
-import { Ionicons, Feather, FontAwesome6 } from "@expo/vector-icons";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import "../../global.css";
-import { useAuth } from "@/src/context/AuthContext";
-import { router } from "expo-router";
 
 import ProgramBenefits from "@/components/ProgramBenefits/ProgramBenefits";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { BlurView } from "expo-blur";
 
 const SERVICES = [
   { id: 1, label: "Services", icon: "gear" },
@@ -34,6 +37,8 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showAll, setShowAll] = useState(false);
   const [visibleServices, setVisibleServices] = useState(SERVICES.slice(0, 7));
+  const [showApplyNowModal, setShowApplyNowModal] = useState(false);
+  const tabBarHeight = useBottomTabBarHeight();
 
   return (
     <SafeAreaProvider>
@@ -181,8 +186,199 @@ export default function HomeScreen() {
             )}
           </View>
 
-          <ProgramBenefits />
+          <ProgramBenefits onApplyNow={() => setShowApplyNowModal(true)} />
         </ScrollView>
+
+        {showApplyNowModal && (
+          <View
+            className="absolute top-0 left-0 right-0"
+            style={{ bottom: tabBarHeight }}
+          >
+            <Pressable
+              onPress={() => setShowApplyNowModal(false)}
+              style={StyleSheet.absoluteFillObject}
+            >
+              <BlurView
+                intensity={20}
+                tint="default"
+                style={StyleSheet.absoluteFillObject}
+              />
+              <View
+                style={StyleSheet.absoluteFillObject}
+                className="bg-black/20"
+              />
+            </Pressable>
+
+            <View className="flex-1 items-center justify-center px-4">
+              <View className="w-full max-w-[520px] bg-white dark:bg-[#1E1D23] rounded-3xl overflow-hidden border border-zinc-100 dark:border-zinc-800">
+                <View className="px-5 pt-5 pb-4 bg-rose-50/60 dark:bg-zinc-900">
+                  <View className="flex-row items-start justify-between">
+                    <View className="flex-row items-center flex-1 pr-3">
+                      <View className="w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-950/30 items-center justify-center">
+                        <Ionicons name="heart" size={22} color="#ef4444" />
+                      </View>
+                      <View className="ml-3 flex-1">
+                        <Text className="text-[#101828] dark:text-white text-lg font-poppins-bold">
+                          Naga Scholars Program
+                        </Text>
+                        <Text className="text-zinc-600 dark:text-zinc-200 text-xs font-poppins-reg mt-1">
+                          Educational support for qualified students
+                        </Text>
+                      </View>
+                    </View>
+
+                    <Pressable
+                      onPress={() => setShowApplyNowModal(false)}
+                      className="w-10 h-10 rounded-full bg-white/70 dark:bg-zinc-800 items-center justify-center"
+                    >
+                      <Ionicons name="close" size={18} color="#64748b" />
+                    </Pressable>
+                  </View>
+
+                  <View className="flex-row items-center mt-3">
+                    <View className="px-3 py-1 rounded-full bg-green-500">
+                      <Text className="text-white text-xs font-poppins-semibold">
+                        Available
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center ml-4">
+                      <Ionicons name="people-outline" size={14} color="#64748b" />
+                      <Text className="ml-1 text-xs text-zinc-500 dark:text-zinc-300 font-poppins-reg">
+                        1,234 served
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center ml-4">
+                      <Ionicons name="time-outline" size={14} color="#64748b" />
+                      <Text className="ml-1 text-xs text-zinc-500 dark:text-zinc-300 font-poppins-reg">
+                        3-5 days
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+
+                <ScrollView className="max-h-[520px]" showsVerticalScrollIndicator={true}>
+                  <View className="px-5 py-4">
+                    <View className="flex-row items-center">
+                      <View className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 items-center justify-center">
+                        <Ionicons name="calendar-outline" size={18} color="#2563eb" />
+                      </View>
+                      <Text className="ml-3 text-[#101828] dark:text-white font-poppins-semibold">
+                        When to Apply
+                      </Text>
+                    </View>
+
+                    <View className="mt-3 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900 px-4 py-3">
+                      <View className="flex-row items-center">
+                        <Ionicons name="calendar" size={16} color="#2563eb" />
+                        <View className="ml-3">
+                          <Text className="text-[#101828] dark:text-white font-poppins-semibold text-sm">
+                            Monday to Friday
+                          </Text>
+                          <Text className="text-zinc-600 dark:text-zinc-200 text-xs font-poppins-reg mt-0.5">
+                            8:00 AM - 5:00 PM
+                          </Text>
+                        </View>
+                      </View>
+                      <View className="mt-3 pt-3 border-t border-indigo-100 dark:border-indigo-900 flex-row items-center">
+                        <Ionicons name="alert-circle-outline" size={16} color="#f97316" />
+                        <Text className="ml-2 text-xs text-zinc-600 dark:text-zinc-200 font-poppins-reg">
+                          Closed on weekends and public holidays
+                        </Text>
+                      </View>
+                    </View>
+
+                    <View className="mt-6 flex-row items-center">
+                      <View className="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/30 items-center justify-center">
+                        <Ionicons name="location-outline" size={18} color="#db2777" />
+                      </View>
+                      <Text className="ml-3 text-[#101828] dark:text-white font-poppins-semibold">
+                        Where to Apply
+                      </Text>
+                    </View>
+
+                    <View className="mt-3 rounded-2xl bg-rose-50/60 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900 px-4 py-3">
+                      <Text className="text-[#101828] dark:text-white font-poppins-semibold text-sm">
+                        City Hall Main Lobby
+                      </Text>
+                      <Text className="text-zinc-600 dark:text-zinc-200 text-xs font-poppins-reg mt-1">
+                        Naga City Hall, J. Miranda Ave, Naga City
+                      </Text>
+                      <Text className="text-zinc-600 dark:text-zinc-200 text-xs font-poppins-reg mt-1">
+                        2nd Floor, Scholarship Office
+                      </Text>
+                      <View className="mt-3 pt-3 border-t border-rose-100 dark:border-rose-900 flex-row items-center justify-between">
+                        <View className="flex-row items-center">
+                          <Ionicons name="call-outline" size={14} color="#64748b" />
+                          <Text className="ml-2 text-xs text-zinc-600 dark:text-zinc-200 font-poppins-reg">
+                            (054) 473-1234
+                          </Text>
+                        </View>
+                        <View className="flex-row items-center">
+                          <Ionicons name="mail-outline" size={14} color="#64748b" />
+                          <Text className="ml-2 text-xs text-zinc-600 dark:text-zinc-200 font-poppins-reg">
+                            Email
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+
+                    <View className="mt-6 flex-row items-center">
+                      <View className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/30 items-center justify-center">
+                        <Ionicons name="document-text-outline" size={18} color="#f59e0b" />
+                      </View>
+                      <Text className="ml-3 text-[#101828] dark:text-white font-poppins-semibold">
+                        What You Need
+                      </Text>
+                    </View>
+
+                    <View className="mt-3 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 px-4 py-3">
+                      <Text className="text-[#101828] dark:text-white font-poppins-semibold text-sm">
+                        Requirements (placeholder)
+                      </Text>
+                      <View className="mt-2">
+                        {[
+                          "Proof of enrollment",
+                          "Valid ID",
+                          "Academic records",
+                          "Application form",
+                        ].map((item) => (
+                          <View key={item} className="flex-row items-center mt-2">
+                            <Ionicons name="checkmark-circle" size={16} color="#22c55e" />
+                            <Text className="ml-2 text-xs text-zinc-700 dark:text-zinc-200 font-poppins-reg">
+                              {item}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  </View>
+                </ScrollView>
+
+                <View className="px-5 py-4 border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-[#1E1D23]">
+                  <View className="flex-row gap-3">
+                    <Pressable
+                      onPress={() => setShowApplyNowModal(false)}
+                      className="flex-1 rounded-2xl py-3 items-center border border-zinc-200 dark:border-zinc-700"
+                    >
+                      <Text className="text-zinc-700 dark:text-zinc-200 font-poppins-semibold">
+                        Close
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => {
+                        setShowApplyNowModal(false);
+                        router.push("/document-verification");
+                      }}
+                      className="flex-1 rounded-2xl py-3 items-center bg-indigo-700"
+                    >
+                      <Text className="text-white font-poppins-semibold">Apply Now</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </View>
+        )}
       </SafeAreaView>
     </SafeAreaProvider>
   );
