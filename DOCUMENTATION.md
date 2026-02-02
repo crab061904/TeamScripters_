@@ -19,6 +19,49 @@
 
 ---
 
+## OCR Prototype (Phone vs Web)
+
+### Web
+
+On web, OCR runs directly in the browser.
+
+### Android/iOS (Expo Go)
+
+On phone, OCR runs via a small local backend server (because `tesseract.js` is not reliable inside Expo Go on-device).
+
+#### 1) Start the OCR backend server
+
+From the project root:
+
+```bash
+cd ocr-server
+npm install
+npm start
+```
+
+The server listens on port `8787`.
+
+#### 2) Point the app to your backend server
+
+Set `EXPO_PUBLIC_OCR_BACKEND_URL` to your PC’s LAN IP (not `localhost`). Example:
+
+```env
+EXPO_PUBLIC_OCR_BACKEND_URL=http://192.168.1.50:8787
+```
+
+Then restart Expo with a clean cache:
+
+```bash
+npx expo start -c
+```
+
+#### Notes
+
+- Your phone and PC must be on the same Wi-Fi.
+- If you get a network error, allow port `8787` through Windows Firewall.
+
+---
+
 ## Styling System
 
 ### Light & Dark Mode
