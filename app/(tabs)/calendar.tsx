@@ -1,12 +1,16 @@
-import { useMemo, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { loadDraft, saveFinalRecord } from "@/src/utils/applicationStorage";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { useMemo, useState } from "react";
+import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import QRCode from "react-native-qrcode-svg";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CalendarScreen() {
   const monthLabel = "February 2026";
   const [selectedDay, setSelectedDay] = useState<number>(5);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [qrPayload, setQrPayload] = useState<string | null>(null);
+  const [showQr, setShowQr] = useState(false);
 
   const days = useMemo(() => {
     const totalCells = 42;
@@ -39,6 +43,37 @@ export default function CalendarScreen() {
   );
 
   const selectedDateLabel = `Thu, ${selectedDay} February 2026`;
+
+  async function confirmAppointment() {
+    if (!selectedTime) return;
+
+    const draft = await loadDraft();
+    const documents =
+      draft?.documents ??
+      ([
+        {
+          document: { name: "Document 1" },
+          fields: {
+            name: "",
+            studentId: "",
+            school: "",
+            program: "Naga Scholars Program",
+            dates: "",
+          },
+        },
+      ] as const);
+
+    const appointment = {
+      monthLabel,
+      selectedDay,
+      selectedTime,
+      selectedDateLabel,
+    };
+
+    const record = await saveFinalRecord({ documents, appointment });
+    setQrPayload(record.qrPayload);
+    setShowQr(true);
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-indigo-50 dark:bg-[#2C2932]">
@@ -234,9 +269,7 @@ export default function CalendarScreen() {
                 </View>
 
                 <Pressable
-                  onPress={() => {
-                    if (!selectedTime) return;
-                  }}
+                  onPress={confirmAppointment}
                   className={`mt-4 rounded-2xl py-3 items-center ${
                     selectedTime ? "bg-indigo-600" : "bg-zinc-200 dark:bg-zinc-800"
                   }`}
@@ -319,6 +352,36 @@ export default function CalendarScreen() {
           </View>
         </View>
       </ScrollView>
+
+      <Modal visible={showQr} transparent animationType="fade" onRequestClose={() => setShowQr(false)}>
+        <View className="flex-1 bg-black/50 items-center justify-center px-6">
+          <View className="w-full bg-white dark:bg-[#1E1D23] rounded-2xl p-6 border border-zinc-200 dark:border-zinc-800">
+            <Text className="text-[#101828] dark:text-white font-poppins-semibold text-base text-center">
+              Appointment Confirmed
+            </Text>
+            <Text className="mt-2 text-zinc-600 dark:text-zinc-200 font-poppins-reg text-xs text-center">
+              Show this QR code at the office
+            </Text>
+
+            <View className="mt-5 items-center justify-center">
+              {qrPayload && (
+                <View className="bg-white p-4 rounded-2xl border border-zinc-200">
+                  <QRCode value={qrPayload} size={220} />
+                </View>
+              )}
+            </View>
+
+            <View className="mt-5 flex-row gap-3">
+              <Pressable
+                onPress={() => setShowQr(false)}
+                className="flex-1 rounded-2xl py-3 items-center border border-zinc-200 dark:border-zinc-700"
+              >
+                <Text className="text-zinc-700 dark:text-zinc-200 font-poppins-semibold">Close</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
