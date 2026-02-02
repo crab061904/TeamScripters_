@@ -577,10 +577,13 @@ export default function DocumentVerificationScreen() {
                             setDocStates([]);
                             setActiveIndex(0);
                           }}
-                          className="flex-1 rounded-2xl py-3 items-center border border-zinc-200 dark:border-zinc-700"
+                          className="flex-1 rounded-2xl py-3 px-3 items-center justify-center border border-zinc-200 dark:border-zinc-700"
                         >
-                          <Text className="text-zinc-700 dark:text-zinc-200 font-poppins-semibold">
-                            Upload Different Document
+                          <Text
+                            numberOfLines={1}
+                            className="text-zinc-700 dark:text-zinc-200 font-poppins-semibold text-sm"
+                          >
+                            Change Document
                           </Text>
                         </Pressable>
                         <Pressable
@@ -598,10 +601,10 @@ export default function DocumentVerificationScreen() {
                             );
                             router.push("/calendar");
                           }}
-                          className="flex-1 rounded-2xl py-3 items-center bg-indigo-700"
+                          className="flex-1 rounded-2xl py-3 px-3 items-center justify-center bg-indigo-700"
                         >
-                          <Text className="text-white font-poppins-semibold">
-                            Confirm & Continue
+                          <Text numberOfLines={1} className="text-white font-poppins-semibold">
+                            Confirm
                           </Text>
                         </Pressable>
                       </View>
