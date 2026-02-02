@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { Text, View } from "react-native";
 import ProgramBenefitCard from "./ProgramBenefitCard";
 
 const NAGA_BENEFITS_DATA = [
@@ -58,9 +58,13 @@ const NAGA_BENEFITS_DATA = [
     ],
     ctaText: "Ineligible",
   },
-];
+] as const;
 
-export default function ProgramBenefits() {
+export default function ProgramBenefits({
+  onApplyNow,
+}: {
+  onApplyNow?: () => void;
+}) {
   return (
     <View className="px-4  pt-5  mt-2 bg-white  dark:bg-[#1E1D23]">
       <Text className="font-poppins-semibold text-[#101828] dark:text-white  text-xl mb-6">
@@ -80,6 +84,9 @@ export default function ProgramBenefits() {
             ctaText={benefit.ctaText}
             location={benefit.location}
             schedule={benefit.schedule}
+            onPress={
+              benefit.ctaText === "Apply Now" ? onApplyNow : undefined
+            }
           />
         ))}
       </View>
