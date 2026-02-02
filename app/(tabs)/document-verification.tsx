@@ -167,6 +167,16 @@ export default function DocumentVerificationScreen() {
     [active, isProcessing],
   );
 
+  function deleteActiveDoc() {
+    setDocStates((prev) => {
+      if (prev.length === 0) return prev;
+      const nextArr = prev.filter((_, idx) => idx !== activeIndex);
+      const nextIndex = Math.max(0, Math.min(activeIndex, nextArr.length - 1));
+      setActiveIndex(nextArr.length === 0 ? 0 : nextIndex);
+      return nextArr;
+    });
+  }
+
   async function takePhoto() {
     const { status: perm } = await ImagePicker.requestCameraPermissionsAsync();
     if (perm !== "granted") return;
@@ -382,6 +392,16 @@ export default function DocumentVerificationScreen() {
                       </Text>
                     </View>
                   </View>
+
+                  <Pressable
+                    onPress={deleteActiveDoc}
+                    disabled={isProcessing}
+                    className={`ml-3 w-10 h-10 rounded-2xl items-center justify-center border border-zinc-200 dark:border-zinc-700 ${
+                      isProcessing ? "opacity-50" : ""
+                    }`}
+                  >
+                    <Ionicons name="trash-outline" size={18} color="#ef4444" />
+                  </Pressable>
                 </View>
               ) : (
                 <View className="flex-row justify-between mt-4">
